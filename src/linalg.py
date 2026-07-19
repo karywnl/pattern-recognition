@@ -35,3 +35,21 @@ def matmul(A, B):
 
     return arr
 
+
+# is symmetric matrix
+def is_symmetric(A):
+    m = len(A)
+    n = len(A[0])
+
+    if m != n:
+        return False
+    
+    for i in range(m):
+        for j in range(i+1, n):
+            if A[i][j] != A[j][i]:
+                return False
+
+    return True
+
+
+
