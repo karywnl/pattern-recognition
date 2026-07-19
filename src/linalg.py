@@ -51,5 +51,37 @@ def is_symmetric(A):
 
     return True
 
+# is upper triangular matrix
+def is_upper(A):
+    m = len(A)
+    n = len(A[0])
+
+    if m != n:
+        return False
+
+    # selecting the i>j region
+    for i in range(1, m):
+        for j in range(i):
+            if A[i][j] != 0:
+                return False
+
+    return True
+
+# is lower triangular matrix
+def is_lower(A):
+    m = len(A)
+    n = len(A[0])
+
+    if m != n:
+        return False
+
+    # selecting the i<j region
+    for i in range(m):
+        for j in range(i+1, n):
+            if A[i][j] != 0:
+                return False
+
+    return True
+
 
 
