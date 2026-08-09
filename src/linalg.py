@@ -84,4 +84,45 @@ def is_lower(A):
     return True
 
 
+# eigendecomposition, sorted by descending eigenvalue magnitude
+def evd(A):
+    eigenvalues, Q = np.linalg.eig(A)
+    order = np.argsort(np.abs(eigenvalues))[::-1]
+    return eigenvalues[order], Q[:, order]
+
+# rank-k reconstruction A_k = Q * lambda_k * Q^-1
+def reconstruct_evd(eigenvalues, Q, k):
+    n = len(eigenvalues)
+
+    # keep conjugate pairs together
+    if 0 < k < n and np.isclose(eigenvalues[k], np.conj(eigenvalues[k - 1])):
+        k += 1
+
+    lambda_k = np.zeros(n, dtype=complex)
+    lambda_k[:k] = eigenvalues[:k]
+    lambda_k = np.diag(lambda_k)
+
+    q_inv = np.linalg.inv(Q)
+    a_k = Q @ lambda_k @ q_inv
+    return np.real(a_k)
+
+# singular value decomposition, sorted descending by construction
+def svd(A):
+    U, singular_values, Vt = np.linalg.svd(A)
+    return U, singular_values, Vt
+
+# rank-k reconstruction A_k = U * sigma_k * V^t
+def reconstruct_svd(U, singular_values, Vt, k):
+    m = U.shape[0]
+    n = Vt.shape[0]
+
+    sigma_k = np.zeros((m, n))
+    sigma_k[:k, :k] = np.diag(singular_values[:k])
+
+    return U @ sigma_k @ Vt
+
+# frobenius norm: sqrt of sum of squares of every entry
+def frobenius_norm(A):
+    return np.sqrt(np.sum(A ** 2))
+
 
