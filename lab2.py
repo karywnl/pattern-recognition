@@ -3,7 +3,7 @@ from src import imaging, linalg, plotting
 ks = [5, 20, 50]
 
 # Task 1: square image - EVD + SVD
-img = imaging.load_image("lab-2-img/cat_02_square.png")
+img = imaging.load_image("docs/assignments/lab-2-img/cat_02_square.png")
 img = imaging.resize(img, (100, 100))
 A = imaging.to_grayscale(img)
 
@@ -24,7 +24,7 @@ errors_svd = [linalg.frobenius_norm(A - linalg.reconstruct_svd(U, s, Vt, k)) for
 plotting.error_curve(all_ks, {"evd": errors_evd, "svd": errors_svd}, title="square image: E(k) vs k")
 
 # Task 2: rectangular image - SVD only
-img2 = imaging.load_image("lab-2-img/cat_02_rectangle.png")
+img2 = imaging.load_image("docs/assignments/lab-2-img/cat_02_rectangle.png")
 img2 = imaging.resize_preserve_aspect(img2, 100)
 A2 = imaging.to_grayscale(img2)
 
