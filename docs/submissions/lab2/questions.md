@@ -117,3 +117,47 @@ If it's a square matrix and symmetric already just go with EVD because it's less
     anything else)?
 
 Complex eigenvalues really took it's time to land, We pondered a lot just to end up getting the justification from the quadratic roots formula.
+
+
+## Follow-up: the k=20 EVD artifact (added after review)
+
+These four cover the ringing/streaking in the k=20 EVD figure. Answer in your
+own words — the supporting numbers are given so you don't have to re-derive them.
+
+16. Your professor suggested the k=20 distortion came from mishandled complex
+    conjugates. Explain, in your own words, why that turned out NOT to be the
+    cause. Numbers you can cite: all 82 complex eigenvalues sit adjacent to
+    their conjugate partner; the pair at index 18/19 means the cut at k=20
+    doesn't split any pair at all; the imaginary part discarded by np.real()
+    is about 2.5e-11, against pixel values of ~255.
+
+
+17. Explain what the real cause is. The chain of reasoning:
+    - A is not symmetric, so its eigenvectors are not perpendicular.
+    - Eigenvalues 18 and 19 are 115.9166 +/- 3.9116j — the imaginary part is
+      only 3% of the real part, so this is nearly a *repeated* eigenvalue.
+    - Their two eigenvectors are therefore nearly parallel: |cos(angle)| =
+      0.9934, roughly 0.6 degrees apart.
+    - Rows 18 and 19 of Q^-1 have norm 88.8, against a median of 10.3.
+      (Exact identity: ||r_i|| = 1 / distance from q_i to the span of the
+      other eigenvectors. That distance is 0.0113 here.)
+    - So those two rank-1 layers each have size 10,297 — the 2nd and 3rd
+      largest of all 100 — even though they rank only 19th by |lambda|.
+
+
+18. Explain why oversized layers make truncation dangerous. Numbers:
+    - Size of A itself: 18,013.
+    - Sum of all 100 EVD layer sizes: 106,858 (six times larger).
+    - Dropping layers 20-99 discards 35,509 worth of material and leaves
+      2,575 of error.
+    - Same truncation under SVD discards only 3,501 and leaves 582.
+    Also worth stating: this is why E(k) for EVD is non-monotonic — it gets
+    *worse* at 14 of the 99 steps — while SVD's E(k) strictly decreases,
+    which is Eckart-Young.
+
+
+19. (Optional, one line) Note that rescaling to 100x100 is not the cause and
+    not the cure: at the full 512x512 the EVD/SVD error ratio is still ~4.1.
+    Rescaling was only for speed. Also, for any square n x n matrix, EVD gives
+    exactly n eigenvalues and SVD exactly n singular values, so E(k) for both
+    can always be plotted on the same axes.

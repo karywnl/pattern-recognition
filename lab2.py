@@ -1,6 +1,6 @@
 from src import imaging, linalg, plotting
 
-ks = [5, 20, 50]
+ks = [5, 25, 50]
 
 # Task 1: square image - EVD + SVD
 img = imaging.load_image("docs/assignments/lab-2-img/cat_02_square.png")
@@ -19,9 +19,11 @@ for k in ks:
 
 n = len(eigenvalues)
 all_ks = list(range(1, n + 1))
-errors_evd = [linalg.frobenius_norm(A - linalg.reconstruct_evd(eigenvalues, Q, k)) for k in all_ks]
+# conjugate pairs are kept whole, so only these ranks are actually reachable
+ks_evd = sorted({linalg.effective_k(eigenvalues, k) for k in all_ks})
+errors_evd = [linalg.frobenius_norm(A - linalg.reconstruct_evd(eigenvalues, Q, k)) for k in ks_evd]
 errors_svd = [linalg.frobenius_norm(A - linalg.reconstruct_svd(U, s, Vt, k)) for k in all_ks]
-plotting.error_curve(all_ks, {"evd": errors_evd, "svd": errors_svd}, title="square image: E(k) vs k")
+plotting.error_curve({"evd": (ks_evd, errors_evd), "svd": (all_ks, errors_svd)}, title="square image: E(k) vs k")
 
 # Task 2: rectangular image - SVD only
 img2 = imaging.load_image("docs/assignments/lab-2-img/cat_02_rectangle.png")
@@ -38,4 +40,4 @@ for k in ks:
 n2 = len(s2)
 all_ks2 = list(range(1, n2 + 1))
 errors2 = [linalg.frobenius_norm(A2 - linalg.reconstruct_svd(U2, s2, Vt2, k)) for k in all_ks2]
-plotting.error_curve(all_ks2, {"svd": errors2}, title="rectangle image: E(k) vs k")
+plotting.error_curve({"svd": (all_ks2, errors2)}, title="rectangle image: E(k) vs k")

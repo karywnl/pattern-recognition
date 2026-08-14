@@ -27,10 +27,10 @@ def show_reconstruction(original, reconstructed, title=""):
     fig.suptitle(title)
     plt.show()
 
-# plot E(k) vs k, series = {label: errors}
-def error_curve(ks, series, title=""):
+# plot E(k) vs k, series = {label: (ks, errors)}
+def error_curve(series, title=""):
     plt.figure()
-    for label, errors in series.items():
+    for label, (ks, errors) in series.items():
         plt.plot(ks, errors, label=label)
     plt.xlabel("k")
     plt.ylabel("E(k)")

@@ -90,13 +90,17 @@ def evd(A):
     order = np.argsort(np.abs(eigenvalues))[::-1]
     return eigenvalues[order], Q[:, order]
 
+# rank actually used after keeping conjugate pairs together
+def effective_k(eigenvalues, k):
+    n = len(eigenvalues)
+    if 0 < k < n and np.isclose(eigenvalues[k], np.conj(eigenvalues[k - 1])):
+        k += 1
+    return k
+
 # rank-k reconstruction A_k = Q * lambda_k * Q^-1
 def reconstruct_evd(eigenvalues, Q, k):
     n = len(eigenvalues)
-
-    # keep conjugate pairs together
-    if 0 < k < n and np.isclose(eigenvalues[k], np.conj(eigenvalues[k - 1])):
-        k += 1
+    k = effective_k(eigenvalues, k)
 
     lambda_k = np.zeros(n, dtype=complex)
     lambda_k[:k] = eigenvalues[:k]
@@ -124,5 +128,3 @@ def reconstruct_svd(U, singular_values, Vt, k):
 # frobenius norm: sqrt of sum of squares of every entry
 def frobenius_norm(A):
     return np.sqrt(np.sum(A ** 2))
-
-
