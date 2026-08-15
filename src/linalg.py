@@ -84,11 +84,36 @@ def is_lower(A):
     return True
 
 
+# sort eigenvalues by descending magnitude while keeping each eigenvector paired
+# with its corresponding eigenvalue
+def sort_eigenpairs(eigenvalues, Q):
+    eigenvalues = eigenvalues.copy()
+    Q = Q.copy()
+    n = len(eigenvalues)
+
+    for i in range(n):
+        largest = i
+
+        for j in range(i + 1, n):
+            if np.abs(eigenvalues[j]) > np.abs(eigenvalues[largest]):
+                largest = j
+
+        if largest != i:
+            temp_value = eigenvalues[i]
+            eigenvalues[i] = eigenvalues[largest]
+            eigenvalues[largest] = temp_value
+
+            temp_vector = Q[:, i].copy()
+            Q[:, i] = Q[:, largest]
+            Q[:, largest] = temp_vector
+
+    return eigenvalues, Q
+
+
 # eigendecomposition, sorted by descending eigenvalue magnitude
 def evd(A):
     eigenvalues, Q = np.linalg.eig(A)
-    order = np.argsort(np.abs(eigenvalues))[::-1]
-    return eigenvalues[order], Q[:, order]
+    return sort_eigenpairs(eigenvalues, Q)
 
 # rank actually used after keeping conjugate pairs together
 def effective_k(eigenvalues, k):

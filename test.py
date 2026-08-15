@@ -3,13 +3,12 @@ import numpy as np
 import sys
 
 img = imaging.load_image("docs/assignments/lab-2-img/cat_02_square.png") 
-# img = imaging.resize(img, (100, 100))
-A = imaging.to_grayscale(img) / 255.0
+img = imaging.resize(img, (100, 100))
+A = imaging.to_grayscale(img)
 
 print(A.min(), A.max())
 
-# sys.exit(0)
-k = 5
+k = 100
 
 eigenvalues, Q = linalg.evd(A)
 print(eigenvalues, len(list(eigenvalues)))

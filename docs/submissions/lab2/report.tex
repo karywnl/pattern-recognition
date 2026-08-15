@@ -167,63 +167,49 @@ across the $k$ boundary when truncating, and then stripping out the
 imaginary part and keeping only the real part before the result becomes a
 displayable image.
 
-\subsection*{A Deep look into EVD at $k=20$}
+\subsection*{A Deep Look into EVD at $k=20$}
 
-\[
-A \;=\; \sum_{i=1}^{100} \lambda_i \, q_i r_i ,
-\qquad
-\text{layer size} \;=\; \lVert \lambda_i q_i r_i \rVert_F \;=\; |\lambda_i| \cdot \lVert q_i \rVert \cdot \lVert r_i \rVert
-\]
-
-where, for each $i$,
-\begin{itemize}
-\itemsep0em
-\item $\lambda_i$ is the $i$-th eigenvalue of $A$,
-\item $q_i$ is the $i$-th column of $Q$, i.e. the eigenvector for $\lambda_i$,
-\item $r_i$ is the $i$-th row of $Q^{-1}$,
-\item $\mathrm{gap}_i = \min_{j \neq i} |\lambda_i - \lambda_j|$ is the straight-line
-      distance in the complex plane from $\lambda_i$ to the nearest other eigenvalue.
-      For a conjugate pair $a \pm bi$ the two members are $2|b|$ apart, so the gap is
-      set by the size of the imaginary part.
-\end{itemize}
+If we write the EVD as sum of outer products, scaled by corresponding eigen value then. Each EVD layer is $L_i=\lambda_iq_ir_i$, where $q_i$ is a column of $Q$ and
+$r_i$ is a row of $Q^{-1}$.  Its size is
+$\lVert L_i\rVert_F=|\lambda_i|\lVert q_i\rVert_2\lVert r_i\rVert_2$.
 
 \begin{table}[H]
 \centering
-\small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{clccccc}
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{clcccc}
 \toprule
-$i$ & \multicolumn{1}{c}{$\lambda_i$} & $|\lambda_i|$ & $\lVert q_i \rVert$ & $\lVert r_i \rVert$ & $\mathrm{gap}_i$ & layer size \\
+$i$ & \multicolumn{1}{c}{$\lambda_i$} & $|\lambda_i|$ & $\lVert q_i\rVert$ & $\lVert r_i\rVert$ & layer size \\
 \midrule
-0  & 17299.45          & 17299.5 & 1.0 & 1.0  & 16990.1 & 17685 \\
-1  & -976.95           & 977.0   & 1.0 & 3.4  & 538.3   & 3293  \\
-2  & -476.72 + 198.85i & 516.5   & 1.0 & 4.1  & 336.0   & 2138  \\
-3  & -476.72 - 198.85i & 516.5   & 1.0 & 4.1  & 336.0   & 2138  \\
-4  & 241.92 + 316.27i  & 398.2   & 1.0 & 4.7  & 238.9   & 1886  \\
-5  & 241.92 - 316.27i  & 398.2   & 1.0 & 4.7  & 238.9   & 1886  \\
-6  & 309.62 + 87.19i   & 321.7   & 1.0 & 10.0 & 154.2   & 3212  \\
-7  & 309.62 - 87.19i   & 321.7   & 1.0 & 10.0 & 154.2   & 3212  \\
-8  & -66.15 + 225.62i  & 235.1   & 1.0 & 5.3  & 135.1   & 1256  \\
-9  & -66.15 - 225.62i  & 235.1   & 1.0 & 5.3  & 135.1   & 1256  \\
-10 & 182.44            & 182.4   & 1.0 & 10.1 & 66.6    & 1851  \\
-11 & -171.43 - 58.55i  & 181.2   & 1.0 & 10.3 & 58.8    & 1858  \\
-12 & -171.43 + 58.55i  & 181.2   & 1.0 & 10.3 & 58.8    & 1858  \\
-13 & -177.14           & 177.1   & 1.0 & 8.5  & 58.8    & 1503  \\
-14 & 97.03 + 89.13i    & 131.8   & 1.0 & 10.2 & 60.8    & 1348  \\
-15 & 97.03 - 89.13i    & 131.8   & 1.0 & 10.2 & 60.8    & 1348  \\
-16 & 32.23 + 117.24i   & 121.6   & 1.0 & 12.4 & 28.5    & 1513  \\
-17 & 32.23 - 117.24i   & 121.6   & 1.0 & 12.4 & 28.5    & 1513  \\
-\textbf{18} & \textbf{115.92 + 3.91i} & \textbf{116.0} & \textbf{1.0} & \textbf{88.8} & \textbf{7.8} & \textbf{10297} \\
-\textbf{19} & \textbf{115.92 - 3.91i} & \textbf{116.0} & \textbf{1.0} & \textbf{88.8} & \textbf{7.8} & \textbf{10297} \\
+0  & 17299.45          & 17299.5 & 1.0 & 1.0  & 17685 \\
+1  & -976.95           & 977.0   & 1.0 & 3.4  & 3293  \\
+2  & -476.72 + 198.85i & 516.5   & 1.0 & 4.1  & 2138  \\
+3  & -476.72 - 198.85i & 516.5   & 1.0 & 4.1  & 2138  \\
+4  & 241.92 + 316.27i  & 398.2   & 1.0 & 4.7  & 1886  \\
+5  & 241.92 - 316.27i  & 398.2   & 1.0 & 4.7  & 1886  \\
+6  & 309.62 + 87.19i   & 321.7   & 1.0 & 10.0 & 3212  \\
+7  & 309.62 - 87.19i   & 321.7   & 1.0 & 10.0 & 3212  \\
+8  & -66.15 + 225.62i  & 235.1   & 1.0 & 5.3  & 1256  \\
+9  & -66.15 - 225.62i  & 235.1   & 1.0 & 5.3  & 1256  \\
+10 & 182.44            & 182.4   & 1.0 & 10.1 & 1851  \\
+11 & -171.43 - 58.55i  & 181.2   & 1.0 & 10.3 & 1858  \\
+12 & -171.43 + 58.55i  & 181.2   & 1.0 & 10.3 & 1858  \\
+13 & -177.14           & 177.1   & 1.0 & 8.5  & 1503  \\
+14 & 97.03 + 89.13i    & 131.8   & 1.0 & 10.2 & 1348  \\
+15 & 97.03 - 89.13i    & 131.8   & 1.0 & 10.2 & 1348  \\
+16 & 32.23 + 117.24i   & 121.6   & 1.0 & 12.4 & 1513  \\
+17 & 32.23 - 117.24i   & 121.6   & 1.0 & 12.4 & 1513  \\
+\textbf{18} & \textbf{115.92 + 3.91i} & \textbf{116.0} & \textbf{1.0} & \textbf{88.8} & \textbf{10297} \\
+\textbf{19} & \textbf{115.92 - 3.91i} & \textbf{116.0} & \textbf{1.0} & \textbf{88.8} & \textbf{10297} \\
 \midrule
-20 & -26.14 + 96.61i   & 100.1   & 1.0 & 10.3 & 26.2    & 1027  \\
-21 & -26.14 - 96.61i   & 100.1   & 1.0 & 10.3 & 26.2    & 1027  \\
+20 & -26.14 + 96.61i   & 100.1   & 1.0 & 10.3 & 1027  \\
+21 & -26.14 - 96.61i   & 100.1   & 1.0 & 10.3 & 1027  \\
 \bottomrule
 \end{tabular}
-\caption{The 20 EVD layers kept at $k=20$}
+\caption{The first 20 EVD layers kept at $k=20$; indices 20 and 21 are shown only for comparison.}
 \end{table}
 
-Each term in the summation is just an outer-product between columns of $Q$ and rows of $Q^{-1}$ and scaled by the corresponding eigen value. If you look at the eigen values at the $18^{th}$ and $19^{th}$ you could see they are very close to each other as the imaginary part is very low and they have huge layer size. (i.e.) 10297 the second largest after our largest eigen value's layer size. So, we are essentially not preserving the balance effect after truncating to just k values.
+At $k=20$, both members of the conjugate pair (18 and 19) are kept, so their imaginary parts cancel correctly, keeping only the real part.  Their nearly parallel eigenvectors make the corresponding rows of $Q^{-1}$ very large, creating two unusually large layers of size $10{,}297$.  Since the other EVD layers are not orthogonal, the whole image reconstruction depends on layers canceling out each other and truncating them distrupts the overall cancellation, that's why the streaks appear.
 
 \subsection*{Question 2: Rectangular image (SVD only)}
 
@@ -290,5 +276,7 @@ need to handle non-square matrices.
 
 Complex eigenvalues really took its time to land. We pondered a lot just to
 end up getting the justification from the quadratic roots formula.
+
+Another interesting thing we learned while debugging the k=20 case is that, when columns are barely linearly independent, the inverse vectors explode in large numbers.
 
 \end{document}
