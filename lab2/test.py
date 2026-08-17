@@ -1,10 +1,8 @@
 from src import linalg, imaging, plotting
 import numpy as np
 import sys
-from pathlib import Path
 
-lab_dir = Path(__file__).resolve().parent
-img = imaging.load_image(lab_dir / "docs/assignments/lab-2-img/cat_02_square.png")
+img = imaging.load_image("images/cat_02_square.png")
 img = imaging.resize(img, (100, 100))
 A = imaging.to_grayscale(img)
 

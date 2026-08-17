@@ -1,22 +1,16 @@
-from pathlib import Path
-
 from src import imaging, linalg, plotting
 
 ks = [5, 20, 50]
-lab_dir = Path(__file__).resolve().parent
-assignments_dir = lab_dir / "docs/assignments"
-figures_dir = lab_dir / "docs/submissions/figures"
-figures_dir.mkdir(parents=True, exist_ok=True)
 
 # Task 1: square image - EVD + SVD
-loaded_img = imaging.load_image(assignments_dir / "lab-2-img/cat_02_square.png")
+loaded_img = imaging.load_image("images/cat_02_square.png")
 img = imaging.resize(loaded_img, (100, 100))
 A = imaging.to_grayscale(img)
 
 plotting.show_pipeline(
     [loaded_img, img, A],
     ["loaded (512x512)", "resized (100x100)", "grayscale matrix A (100x100)"],
-    save_path=figures_dir / "square_pipeline.png",
+    save_path="../docs/lab2/submissions/figures/square_pipeline.png",
 )
 
 eigenvalues, Q = linalg.evd(A)
@@ -30,13 +24,13 @@ for k in ks:
         A,
         a_k_evd,
         title=f"square EVD, k={k}",
-        save_path=figures_dir / f"square_evd_{k}.png",
+        save_path=f"../docs/lab2/submissions/figures/square_evd_{k}.png",
     )
     plotting.show_reconstruction(
         A,
         a_k_svd,
         title=f"square SVD, k={k}",
-        save_path=figures_dir / f"square_svd_{k}.png",
+        save_path=f"../docs/lab2/submissions/figures/square_svd_{k}.png",
     )
 
 n = len(eigenvalues)
@@ -48,18 +42,18 @@ errors_svd = [linalg.frobenius_norm(A - linalg.reconstruct_svd(U, s, Vt, k)) for
 plotting.error_curve(
     {"evd": (ks_evd, errors_evd), "svd": (all_ks, errors_svd)},
     title="square image: E(k) vs k",
-    save_path=figures_dir / "square_curve.png",
+    save_path="../docs/lab2/submissions/figures/square_curve.png",
 )
 
 # Task 2: rectangular image - SVD only
-loaded_img2 = imaging.load_image(assignments_dir / "lab-2-img/cat_02_rectangle.png")
+loaded_img2 = imaging.load_image("images/cat_02_rectangle.png")
 img2 = imaging.resize_preserve_aspect(loaded_img2, 100)
 A2 = imaging.to_grayscale(img2)
 
 plotting.show_pipeline(
     [loaded_img2, img2, A2],
     ["loaded (520x600)", "resized (87x100)", "grayscale matrix A (100x87)"],
-    save_path=figures_dir / "rect_pipeline.png",
+    save_path="../docs/lab2/submissions/figures/rect_pipeline.png",
 )
 
 U2, s2, Vt2 = linalg.svd(A2)
@@ -71,7 +65,7 @@ for k in ks:
         A2,
         a_k,
         title=f"rectangle SVD, k={k}",
-        save_path=figures_dir / f"rect_svd_{k}.png",
+        save_path=f"../docs/lab2/submissions/figures/rect_svd_{k}.png",
     )
 
 n2 = len(s2)
@@ -80,5 +74,5 @@ errors2 = [linalg.frobenius_norm(A2 - linalg.reconstruct_svd(U2, s2, Vt2, k)) fo
 plotting.error_curve(
     {"svd": (all_ks2, errors2)},
     title="rectangle image: E(k) vs k",
-    save_path=figures_dir / "rect_curve.png",
+    save_path="../docs/lab2/submissions/figures/rect_curve.png",
 )
