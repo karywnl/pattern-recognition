@@ -3,11 +3,13 @@ from pathlib import Path
 from src import imaging, linalg, plotting
 
 ks = [5, 20, 50]
-figures_dir = Path("docs/submissions/lab2/figures")
+lab_dir = Path(__file__).resolve().parent
+assignments_dir = lab_dir / "docs/assignments"
+figures_dir = lab_dir / "docs/submissions/figures"
 figures_dir.mkdir(parents=True, exist_ok=True)
 
 # Task 1: square image - EVD + SVD
-loaded_img = imaging.load_image("docs/assignments/lab-2-img/cat_02_square.png")
+loaded_img = imaging.load_image(assignments_dir / "lab-2-img/cat_02_square.png")
 img = imaging.resize(loaded_img, (100, 100))
 A = imaging.to_grayscale(img)
 
@@ -50,7 +52,7 @@ plotting.error_curve(
 )
 
 # Task 2: rectangular image - SVD only
-loaded_img2 = imaging.load_image("docs/assignments/lab-2-img/cat_02_rectangle.png")
+loaded_img2 = imaging.load_image(assignments_dir / "lab-2-img/cat_02_rectangle.png")
 img2 = imaging.resize_preserve_aspect(loaded_img2, 100)
 A2 = imaging.to_grayscale(img2)
 

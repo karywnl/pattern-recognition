@@ -1,89 +1,5 @@
 import numpy as np
 
-# dot product
-def dot(a, b):
-    tot = 0
-    for i in range(len(a)):
-        tot += a[i] * b[i]
-    return tot    
-
-# transpose mxn to nxm
-def transpose(A):
-    m = len(A)
-    n = len(A[0])
-
-    arr = np.zeros((n, m))
-    for i in range(n):
-        for j in range(m):
-            arr[i, j] = A[j][i]
-
-    return arr
-
-# matrix multiplication
-def matmul(A, B):
-    # A (mxn) * B (nxk) = C (mxk)
-    m = len(A)
-    n = len(B)
-    k = len(B[0])
-
-    B_t = transpose(B)
-    arr = np.zeros((m, k))
-
-    for i in range(m):
-        for j in range(k):
-            arr[i, j] = dot(A[i], B_t[j])
-
-    return arr
-
-
-# is symmetric matrix
-def is_symmetric(A):
-    m = len(A)
-    n = len(A[0])
-
-    if m != n:
-        return False
-    
-    for i in range(m):
-        for j in range(i+1, n):
-            if A[i][j] != A[j][i]:
-                return False
-
-    return True
-
-# is upper triangular matrix
-def is_upper(A):
-    m = len(A)
-    n = len(A[0])
-
-    if m != n:
-        return False
-
-    # selecting the i>j region
-    for i in range(1, m):
-        for j in range(i):
-            if A[i][j] != 0:
-                return False
-
-    return True
-
-# is lower triangular matrix
-def is_lower(A):
-    m = len(A)
-    n = len(A[0])
-
-    if m != n:
-        return False
-
-    # selecting the i<j region
-    for i in range(m):
-        for j in range(i+1, n):
-            if A[i][j] != 0:
-                return False
-
-    return True
-
-
 # sort eigenvalues by descending magnitude while keeping each eigenvector paired
 # with its corresponding eigenvalue
 def sort_eigenpairs(eigenvalues, Q):
@@ -133,6 +49,10 @@ def reconstruct_evd(eigenvalues, Q, k):
 
     q_inv = np.linalg.inv(Q)
     a_k = Q @ lambda_k @ q_inv
+
+    if np.any(np.abs(a_k.imag) > 1e-3):
+        print("Warning: imaginary part is above tolerance")
+
     return np.real(a_k)
 
 # singular value decomposition, sorted descending by construction

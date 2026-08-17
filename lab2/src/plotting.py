@@ -10,15 +10,6 @@ def _finish_figure(fig, save_path=None):
     plt.close(fig)
 
 
-def histogram(data, title="", bins=30, xlabel="value", ylabel="frequency"):
-    fig, ax = plt.subplots()
-    ax.hist(data, bins=bins)
-    ax.set_title(title)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-    _finish_figure(fig)
-
-
 def show_pipeline(images, titles, save_path=None):
     fig, axes = plt.subplots(1, len(images), figsize=(12, 4))
 
