@@ -1,6 +1,5 @@
 from src import linalg, imaging, plotting
 import numpy as np
-import sys
 
 img = imaging.load_image("images/cat_02_square.png")
 img = imaging.resize(img, (100, 100))
