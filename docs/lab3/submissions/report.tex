@@ -1,0 +1,254 @@
+\documentclass[12pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+\graphicspath{{figures/}}
+
+% Edit these values before submitting.
+\newcommand{\studentname}{KARTHIKEYAN M}
+\newcommand{\registernumber}{26120004}
+\newcommand{\teammatename}{MIRTHULA R}
+\newcommand{\teammateregister}{261200121}
+\newcommand{\submissionmonth}{AUGUST 2026}
+
+% Delete each \todo command after replacing it with your own writing.
+\newcommand{\todo}[1]{%
+  \par\noindent
+  \textcolor{red}{\textbf{[WRITE HERE:} \textit{#1}\textbf{]}}
+  \par
+}
+
+\title{}
+\date{}
+
+\begin{document}
+
+% ---------- Title page ----------
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+{\Large \textbf{ASSIGNMENT REPORT-3}}\\[2cm]
+
+\textbf{Submitted by :}\\[0.3cm]
+\textbf{\studentname} \ [\registernumber]\\[0.3cm]
+\textbf{\teammatename} \ [\teammateregister]\\[2cm]
+
+\textbf{Under the guidance of :}\\[0.3cm]
+\textbf{HEMA ARUNACHALAM MURTHY}\\[1.5cm]
+
+\textbf{For The Subject}\\[0.5cm]
+{\Large \textbf{Pattern Recognition and Machine Learning}}\\[0.3cm]
+\textbf{(26AI5707)}\\[3cm]
+
+\vfill
+
+\textbf{DEPARTMENT OF COMPUTER SCIENCE \& ENGINEERING}\\[0.3cm]
+\textbf{SHIV NADAR UNIVERSITY}\\[0.3cm]
+\textbf{KALAVAKAM}\\[1.5cm]
+
+\textbf{\submissionmonth}
+\end{titlepage}
+
+% ---------- Introduction ----------
+\section*{INTRODUCTION:}
+
+\todo{Briefly introduce polynomial regression and state the objective of the assignment.}
+
+% ---------- Experiments Performed ----------
+\section*{Experiments Performed:}
+
+\subsection*{Dataset and Initial Observation}
+
+\todo{Describe the assigned dataset, its two columns, and what the scatter plot suggests about the relationship between $x$ and $y$.}
+
+The assigned file contains $N=10{,}000$ input-target pairs:
+\begin{equation}
+  \mathcal{D}=\{(x_i,y_i)\}_{i=1}^{N},
+  \qquad N=10{,}000.
+\end{equation}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{data_scatter.png}
+  \caption{Scatter plot of the input $x$ and noisy target $y$ from \texttt{noisy\_2.txt}.}
+  \label{fig:data-scatter}
+\end{figure}
+
+\subsection*{Data Shuffling and Splitting}
+
+\todo{Explain why the data was shuffled and record the train, validation, and test split used in the experiment.}
+
+With a fixed random seed of 42, the shuffled dataset was divided as follows:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{lrr}
+    \toprule
+    Split & Fraction & Number of samples \\
+    \midrule
+    Training & $60\%$ & $6{,}000$ \\
+    Validation & $20\%$ & $2{,}000$ \\
+    Test & $20\%$ & $2{,}000$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Train, validation, and test split used in the experiment.}
+  \label{tab:data-split}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.98\textwidth]{shuffle_comparison.png}
+  \caption{Comparison of the training portion before and after shuffling the dataset.}
+  \label{fig:shuffle-comparison}
+\end{figure}
+
+\subsection*{Polynomial Regression}
+
+\todo{Explain in your own words why feature scaling, a polynomial basis, and least squares are used here. Interpret the equations below.}
+
+\textbf{Feature standardization.}
+Only the training split is used to calculate the mean and standard deviation:
+\begin{align}
+  \mu_x &= \frac{1}{N_{\mathrm{tr}}}
+            \sum_{i=1}^{N_{\mathrm{tr}}}x_i,
+  &
+  \sigma_x &= \sqrt{\frac{1}{N_{\mathrm{tr}}}
+            \sum_{i=1}^{N_{\mathrm{tr}}}(x_i-\mu_x)^2}, \\
+  z_i &= \frac{x_i-\mu_x}{\sigma_x},
+  &
+  N_{\mathrm{tr}} &= 6{,}000.
+\end{align}
+The same $\mu_x$ and $\sigma_x$ are used to standardize the validation and
+test inputs.
+
+\textbf{Polynomial basis.}
+For degree $d$, each standardized input is mapped to
+\begin{equation}
+  \boldsymbol{\phi}_d(z_i)
+  = \begin{bmatrix}1 & z_i & z_i^2 & \cdots & z_i^d\end{bmatrix}^{T}.
+\end{equation}
+The design matrix is
+\begin{equation}
+  X_d =
+  \begin{bmatrix}
+    1 & z_1 & z_1^2 & \cdots & z_1^d \\
+    1 & z_2 & z_2^2 & \cdots & z_2^d \\
+    \vdots & \vdots & \vdots & \ddots & \vdots \\
+    1 & z_N & z_N^2 & \cdots & z_N^d
+  \end{bmatrix}.
+\end{equation}
+
+\textbf{Model and prediction.}
+\begin{equation}
+  \hat{y}_i
+  = \boldsymbol{\phi}_d(z_i)^T\mathbf{w}
+  = \sum_{j=0}^{d}w_jz_i^j.
+\end{equation}
+
+\textbf{Least-squares solution.}
+The weights minimize the mean squared training residual:
+\begin{equation}
+  J(\mathbf{w})
+  = \frac{1}{N_{\mathrm{tr}}}
+    \lVert\mathbf{y}-X_d\mathbf{w}\rVert_2^2.
+\end{equation}
+Setting the gradient to zero gives the normal equation and its solution:
+\begin{align}
+  X_d^T X_d\hat{\mathbf{w}} &= X_d^T\mathbf{y}, \\
+  \hat{\mathbf{w}} &= (X_d^T X_d)^{-1}X_d^T\mathbf{y}.
+\end{align}
+
+\textbf{Mean squared error.}
+For any split $\mathcal{S}$,
+\begin{equation}
+  \operatorname{MSE}_{\mathcal{S}}(d)
+  = \frac{1}{|\mathcal{S}|}
+    \sum_{i\in\mathcal{S}}(y_i-\hat{y}_i)^2.
+\end{equation}
+
+\subsection*{Effect of Polynomial Degree}
+
+\todo{Discuss underfitting and how the fitted curve changes as the polynomial degree increases.}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[height=0.84\textheight]{polynomial_fits_degrees_1_to_15.png}
+  \caption{Polynomial curves fitted for degrees 1 through 15.}
+  \label{fig:degree-fits}
+\end{figure}
+
+\clearpage
+
+The degree is selected using the validation error:
+\begin{equation}
+  d^* = \underset{d\in\{1,2,\ldots,15\}}{\arg\min}\;
+        \operatorname{MSE}_{\mathrm{val}}(d) = 10.
+\end{equation}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{rrr}
+    \toprule
+    Degree $d$ & Training MSE & Validation MSE \\
+    \midrule
+    1  & 1144.10 & 1055.51 \\
+    3  &  961.71 &  901.58 \\
+    5  &  906.23 &  849.98 \\
+    6  &  567.61 &  534.78 \\
+    7  &  478.17 &  467.47 \\
+    8  &  364.92 &  348.96 \\
+    10 &  364.69 &  348.63 \\
+    15 &  364.53 &  349.14 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Selected training and validation errors from the degree experiment.}
+  \label{tab:degree-errors}
+\end{table}
+
+\todo{Compare the training and validation errors, explain the change around degrees 6--8, and justify the selected degree in your own words.}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{degree_mse_comparison.png}
+  \caption{Training and validation mean squared error across polynomial degrees.}
+  \label{fig:degree-mse}
+\end{figure}
+
+\subsection*{Final Model Evaluation}
+
+After selecting $d^*=10$, the training and validation samples are combined:
+\begin{equation}
+  \mathcal{D}_{\mathrm{fit}}
+  = \mathcal{D}_{\mathrm{train}}\cup\mathcal{D}_{\mathrm{val}},
+  \qquad |\mathcal{D}_{\mathrm{fit}}|=8{,}000.
+\end{equation}
+The standardization parameters and degree-10 weights are recalculated using
+only $\mathcal{D}_{\mathrm{fit}}$. The resulting held-out test error is
+\begin{equation}
+  \operatorname{MSE}_{\mathrm{test}}(10)=340.0071.
+\end{equation}
+
+\todo{Explain the final fitting procedure and interpret the held-out test result in your own words.}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{test_fit_degree_10.png}
+  \caption{Degree-10 polynomial fitted to the held-out test data; test MSE $=340.0071$.}
+  \label{fig:final-test}
+\end{figure}
+
+% ---------- Additional Experiments ----------
+\section*{Additional Experiments:}
+
+\todo{Add any experiments performed beyond the assignment requirements, such as other basis functions, regularization, or different data splits. Delete this section if it is not used.}
+
+% ---------- Inference ----------
+\section*{\centering \underline{Inference}}
+
+\todo{Summarize your observations about model complexity, the selected degree, generalization, and what you learned from the experiment.}
+
+\end{document}
