@@ -57,14 +57,26 @@
 % ---------- Introduction ----------
 \section*{INTRODUCTION:}
 
-\todo{Briefly introduce polynomial regression and state the objective of the assignment.}
+This project is based on polynomial regression. Polynomial regression is used to model the non-linear relationship between an input variable and a target variable. Instead of fitting a straight line, which is used when the data have a linear relationship, polynomial regression uses different powers of the input variable:
+
+$$
+y = w_0 + w_1x + w_2x^2 + \cdots + w_mx^m
+$$
+
+where \(m\) is the polynomial degree. This equation produces a flexible curve that can fit the model to the data.
+
+The objective of this assignment is to fit polynomial regression models with different degrees on the given noisy dataset and compare their training and validation errors. Based on the validation performance, we select the polynomial degree that gives the best result. The selected model is then retrained using both the training and validation data together and finally tested on the test data to evaluate how well the model performs on unseen data.
+
 
 % ---------- Experiments Performed ----------
 \section*{Experiments Performed:}
 
 \subsection*{Dataset and Initial Observation}
 
-\todo{Describe the assigned dataset, its two columns, and what the scatter plot suggests about the relationship between $x$ and $y$.}
+The assigned noisy dataset contains 10,000 input-output values. The first column represents the input feature (\(x\)), while the second column represents the target variable (\(y\)).
+
+The scatter plot of \(x\) and \(y\) shows a non-linear relationship between the two variables. The data points do not follow a straight-line pattern; instead, they form a curved pattern with some noise around it. Therefore, polynomial regression is more suitable than simple linear regression because it can better capture the curved relationship between \(x\) and \(y\).
+
 
 The assigned file contains $N=10{,}000$ input-target pairs:
 \begin{equation}
@@ -81,7 +93,21 @@ The assigned file contains $N=10{,}000$ input-target pairs:
 
 \subsection*{Data Shuffling and Splitting}
 
-\todo{Explain why the data was shuffled and record the train, validation, and test split used in the experiment.}
+The dataset was shuffled before splitting so that the training, validation, and test sets contained a better mixture of different \(x\) and \(y\) values. If the data were not shuffled, taking the first 60% of the dataset might contain only a specific part of the \(x\) range. This could make it difficult for the model to learn the overall relationship present in the dataset.
+
+A fixed random seed of 42 was used so that the same shuffled data and the same training, validation, and test splits are obtained every time the code is run. This makes the results reproducible.
+
+The dataset was divided as follows:
+
+\begin{itemize}
+\item Training set: 60% = 6,000 samples
+\item Validation set: 20% = 2,000 samples
+\item Test set: 20% = 2,000 samples
+\end{itemize}
+
+Therefore, all 10,000 samples were first shuffled and then divided into training, validation, and test sets.
+
+
 
 With a fixed random seed of 42, the shuffled dataset was divided as follows:
 \begin{table}[H]
@@ -108,7 +134,25 @@ With a fixed random seed of 42, the shuffled dataset was divided as follows:
 
 \subsection*{Polynomial Regression}
 
-\todo{Explain in your own words why feature scaling, a polynomial basis, and least squares are used here. Interpret the equations below.}
+In this experiment, three main steps are involved: feature scaling, polynomial basis construction, and least-squares fitting.
+
+\textbf{Feature Scaling:}
+
+Feature scaling is performed to bring the input values into a similar and manageable range before applying the polynomial transformation. In this experiment, \(x\) is standardized using the mean \(\mu_x\) and standard deviation \(\sigma_x\) calculated from the training data.
+
+Scaling is important in polynomial regression because higher powers of the input are used. If the values are not scaled, terms such as \(x^6\), \(x^{10}\), or \(x^{15}\) can become very large and may cause numerical instability during calculations. The same mean and standard deviation calculated from the training data are also used to transform the validation and test data. This ensures that information from the validation and test sets is not used during model training.
+
+\textbf{Polynomial Basis:}
+
+A polynomial basis is used so that the model can learn a curved relationship instead of being limited to a straight line. For a polynomial of degree \(d\), the standardized input is represented using powers from \(0\) to \(d\). As the polynomial degree increases, the model becomes more flexible and can capture more complex patterns in the data. However, if the degree is too high, the model can become unnecessarily complicated and may start fitting the noise instead of the actual underlying pattern.
+
+\textbf{Least Squares:}
+
+Least squares is used to find the best values of the polynomial weights. It minimizes the difference between the actual \(y\) values and the predicted values from the polynomial model. In other words, it finds the weights that give the smallest overall squared error on the training data. These weights are calculated using the normal equation.
+
+Therefore, in this experiment, feature scaling helps keep the calculations numerically stable, the polynomial basis allows the model to capture non-linear patterns, and least squares finds the polynomial coefficients that best fit the training data. The performance of the model is then evaluated using Mean Squared Error (MSE).
+
+
 
 \textbf{Feature standardization.}
 Only the training split is used to calculate the mean and standard deviation:
@@ -172,7 +216,12 @@ For any split $\mathcal{S}$,
 
 \subsection*{Effect of Polynomial Degree}
 
-\todo{Discuss underfitting and how the fitted curve changes as the polynomial degree increases.}
+A low-degree polynomial may underfit the data because it does not have enough flexibility to represent the non-linear relationship between \(x\) and \(y\). For example, a degree-\(1\) polynomial can only produce a straight line, so it cannot adequately capture a complex curved pattern.
+
+As the polynomial degree increases, the fitted curve becomes more flexible. A degree-\(3\) or degree-\(5\) polynomial can capture more of the curvature in the data, while higher-degree polynomials can model more detailed variations.
+
+In the experiment, the fitted curves become increasingly flexible as the degree increases from \(1\) to \(15\). The training error generally decreases as the degree increases because the model has more parameters and therefore a greater ability to fit the training data. However, increasing the degree indefinitely is not necessarily beneficial because a very complex polynomial can start fitting the noise rather than the underlying relationship. Therefore, the polynomial degree must be selected based on validation performance rather than training error alone.
+
 
 \begin{figure}[p]
   \centering
@@ -209,7 +258,16 @@ The degree is selected using the validation error:
   \label{tab:degree-errors}
 \end{table}
 
-\todo{Compare the training and validation errors, explain the change around degrees 6--8, and justify the selected degree in your own words.}
+The training and validation MSE values generally decrease as the polynomial degree increases. This indicates that increasing the model complexity initially helps the model fit the data better.
+
+For degree \(1\), the training MSE is \(1144.10\) and the validation MSE is \(1055.51\). At degree \(3\), these values decrease to \(961.71\) and \(901.58\), respectively. For degree \(5\), they further decrease to \(906.23\) and \(849.98\), respectively.
+
+A major improvement can be observed around degrees \(6\)--\(8\). The validation MSE decreases from \(849.98\) at degree \(5\) to \(534.78\) at degree \(6\), \(467.47\) at degree \(7\), and \(348.96\) at degree \(8\). This shows that higher-degree polynomials are able to capture the non-linear patterns in the data better than the lower-degree models.
+
+After degree \(8\), the improvement becomes very small. The validation MSE is \(348.63\) at degree \(10\), which is only slightly lower than \(348.96\) at degree \(8\). At degree \(15\), the validation MSE increases slightly to \(349.14\). Therefore, degree \(10\) was selected because it gives the lowest validation MSE among the tested degrees.
+
+The training and validation MSE values are also fairly close to each other. This suggests that the selected model is not simply fitting the training data but is able to generalize reasonably well to unseen data.
+
 
 \begin{figure}[H]
   \centering
@@ -232,7 +290,15 @@ only $\mathcal{D}_{\mathrm{fit}}$. The resulting held-out test error is
   \operatorname{MSE}_{\mathrm{test}}(10)=340.0071.
 \end{equation}
 
-\todo{Explain the final fitting procedure and interpret the held-out test result in your own words.}
+After comparing the different polynomial degrees, degree \(10\) was selected because it gave the lowest validation MSE of \(348.63\).
+
+For the final model, the training and validation datasets were combined to create a larger fitting dataset containing \(8{,}000\) samples. This gives the final model more data to learn from after the polynomial degree has already been selected.
+
+The mean and standard deviation used for standardization were recalculated using only these \(8{,}000\) samples. After that, the weights of the degree-\(10\) polynomial were recalculated using the combined training and validation data.
+
+The test set was kept completely separate and was used only for the final evaluation. The resulting test MSE was \(340.0071\).
+
+The test MSE is slightly lower than the validation MSE of \(348.63\). This shows that the selected degree-\(10\) model performs well on the unseen test data for this particular split. Since the test data were not used during training or model selection, the test MSE provides a fair estimate of how well the final model can generalize to new data.
 
 \begin{figure}[H]
   \centering
@@ -244,11 +310,15 @@ only $\mathcal{D}_{\mathrm{fit}}$. The resulting held-out test error is
 % ---------- Additional Experiments ----------
 \section*{Additional Experiments:}
 
-\todo{Add any experiments performed beyond the assignment requirements, such as other basis functions, regularization, or different data splits. Delete this section if it is not used.}
-
 % ---------- Inference ----------
 \section*{\centering \underline{Inference}}
 
-\todo{Summarize your observations about model complexity, the selected degree, generalization, and what you learned from the experiment.}
+The experiment shows that polynomial degree has a significant effect on model complexity and performance. Very low-degree polynomials underfit the data because they are too simple to capture its non-linear relationship. As the degree increases, the model becomes more flexible, and both training and validation errors initially decrease.
+
+A major improvement was observed between degrees \(5\) and \(8\), indicating that the additional polynomial terms helped the model capture important non-linear patterns in the data. After this point, the improvement became very small. Degree \(10\) produced the lowest validation MSE of \(348.63\) and was therefore selected as the final model. Although the training MSE continued to decrease slightly for higher degrees, the validation MSE increased slightly at degree \(15\), showing that increasing model complexity does not always improve generalization.
+
+The final degree-\(10\) model was retrained using the combined \(8{,}000\) training and validation samples and achieved a test MSE of \(340.0071\) on the held-out test set. The close validation and test performance suggests that the selected model generalizes well to unseen data for this dataset.
+
+Overall, the experiment demonstrated the importance of choosing an appropriate model complexity instead of simply selecting the model with the lowest training error. I also learned how data shuffling, feature standardization, polynomial basis construction, least-squares fitting, validation-based model selection, and final test evaluation work together to build and evaluate a regression model.
 
 \end{document}
