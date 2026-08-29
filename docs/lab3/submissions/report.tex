@@ -9,26 +9,21 @@
 
 \graphicspath{{figures/}}
 
-% Edit these values before submitting.
 \newcommand{\studentname}{KARTHIKEYAN M}
 \newcommand{\registernumber}{26120004}
 \newcommand{\teammatename}{MIRTHULA R}
 \newcommand{\teammateregister}{261200121}
 \newcommand{\submissionmonth}{AUGUST 2026}
 
-% Delete each \todo command after replacing it with your own writing.
+% Replace each prompt with your own short observation before submission.
 \newcommand{\todo}[1]{%
   \par\noindent
   \textcolor{red}{\textbf{[WRITE HERE:} \textit{#1}\textbf{]}}
   \par
 }
 
-\title{}
-\date{}
-
 \begin{document}
 
-% ---------- Title page ----------
 \begin{titlepage}
 \centering
 \vspace*{2cm}
@@ -46,279 +41,210 @@
 \textbf{(26AI5707)}\\[3cm]
 
 \vfill
-
 \textbf{DEPARTMENT OF COMPUTER SCIENCE \& ENGINEERING}\\[0.3cm]
 \textbf{SHIV NADAR UNIVERSITY}\\[0.3cm]
 \textbf{KALAVAKAM}\\[1.5cm]
-
 \textbf{\submissionmonth}
 \end{titlepage}
 
-% ---------- Introduction ----------
-\section*{INTRODUCTION:}
+\section*{INTRODUCTION}
 
-This project is based on polynomial regression. Polynomial regression is used to model the non-linear relationship between an input variable and a target variable. Instead of fitting a straight line, which is used when the data have a linear relationship, polynomial regression uses different powers of the input variable:
+This assignment is mainly about Polynomial Regression. We were given a data with non-linear relationship. The assignment requires us to utilize the help of polynomial basis functions and create a design matrix and transform the inputs and then learn the weights in the transformed space. We will look into that visually later. We have also performed some extra experiments like trying out what happens when you don't normalize your data and also tried a different basis function like Gaussian Basis, that has been asked in the last short exam.
 
-$$
-y = w_0 + w_1x + w_2x^2 + \cdots + w_mx^m
-$$
+\section*{DATA AND SPLIT}
 
-where \(m\) is the polynomial degree. This equation produces a flexible curve that can fit the model to the data.
-
-The objective of this assignment is to fit polynomial regression models with different degrees on the given noisy dataset and compare their training and validation errors. Based on the validation performance, we select the polynomial degree that gives the best result. The selected model is then retrained using both the training and validation data together and finally tested on the test data to evaluate how well the model performs on unseen data.
-
-
-% ---------- Experiments Performed ----------
-\section*{Experiments Performed:}
-
-\subsection*{Dataset and Initial Observation}
-
-The assigned noisy dataset contains 10,000 input-output values. The first column represents the input feature (\(x\)), while the second column represents the target variable (\(y\)).
-
-The scatter plot of \(x\) and \(y\) shows a non-linear relationship between the two variables. The data points do not follow a straight-line pattern; instead, they form a curved pattern with some noise around it. Therefore, polynomial regression is more suitable than simple linear regression because it can better capture the curved relationship between \(x\) and \(y\).
-
-
-The assigned file contains $N=10{,}000$ input-target pairs:
-\begin{equation}
-  \mathcal{D}=\{(x_i,y_i)\}_{i=1}^{N},
-  \qquad N=10{,}000.
-\end{equation}
+\begin{table}[H]
+  \centering
+  \caption{Dataset and split used for model selection.}
+  \begin{tabular}{lrr}
+    \toprule
+    Set & Samples & Percentage \\
+    \midrule
+    Training & 6000 & 60\% \\
+    Validation & 2000 & 20\% \\
+    Test & 2000 & 20\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.82\textwidth]{data_scatter.png}
-  \caption{Scatter plot of the input $x$ and noisy target $y$ from \texttt{noisy\_2.txt}.}
+  \includegraphics[width=0.80\textwidth]{data_scatter.png}
+  \caption{Scatter plot of the 10,000 input--target pairs.}
   \label{fig:data-scatter}
 \end{figure}
 
-\subsection*{Data Shuffling and Splitting}
-
-The dataset was shuffled before splitting so that the training, validation, and test sets contained a better mixture of different \(x\) and \(y\) values. If the data were not shuffled, taking the first 60% of the dataset might contain only a specific part of the \(x\) range. This could make it difficult for the model to learn the overall relationship present in the dataset.
-
-A fixed random seed of 42 was used so that the same shuffled data and the same training, validation, and test splits are obtained every time the code is run. This makes the results reproducible.
-
-The dataset was divided as follows:
-
-\begin{itemize}
-\item Training set: 60% = 6,000 samples
-\item Validation set: 20% = 2,000 samples
-\item Test set: 20% = 2,000 samples
-\end{itemize}
-
-Therefore, all 10,000 samples were first shuffled and then divided into training, validation, and test sets.
-
-
-
-With a fixed random seed of 42, the shuffled dataset was divided as follows:
-\begin{table}[H]
-  \centering
-  \begin{tabular}{lrr}
-    \toprule
-    Split & Fraction & Number of samples \\
-    \midrule
-    Training & $60\%$ & $6{,}000$ \\
-    Validation & $20\%$ & $2{,}000$ \\
-    Test & $20\%$ & $2{,}000$ \\
-    \bottomrule
-  \end{tabular}
-  \caption{Train, validation, and test split used in the experiment.}
-  \label{tab:data-split}
-\end{table}
+The given data are clearly non-linear in nature. Thus, a normal linear regression would not be sufficient. Also, when splitting the shuffling part is crucial because without it we would get cut off within a range and will never get the full representation of the data points. Thus, the samples were shuffled with seed 42 before splitting.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.98\textwidth]{shuffle_comparison.png}
-  \caption{Comparison of the training portion before and after shuffling the dataset.}
-  \label{fig:shuffle-comparison}
+  \includegraphics[width=0.94\textwidth]{shuffle_comparison.png}
+  \caption{Sample order before and after shuffling.}
+  \label{fig:shuffle}
 \end{figure}
 
-\subsection*{Polynomial Regression}
+\section*{POLYNOMIAL REGRESSION}
 
-In this experiment, three main steps are involved: feature scaling, polynomial basis construction, and least-squares fitting.
+\subsection*{Basis and least-squares solution}
 
-\textbf{Feature Scaling:}
+For degree $d$, the design matrix looks something like this and the each feature is standardized.
 
-Feature scaling is performed to bring the input values into a similar and manageable range before applying the polynomial transformation. In this experiment, \(x\) is standardized using the mean \(\mu_x\) and standard deviation \(\sigma_x\) calculated from the training data.
-
-Scaling is important in polynomial regression because higher powers of the input are used. If the values are not scaled, terms such as \(x^6\), \(x^{10}\), or \(x^{15}\) can become very large and may cause numerical instability during calculations. The same mean and standard deviation calculated from the training data are also used to transform the validation and test data. This ensures that information from the validation and test sets is not used during model training.
-
-\textbf{Polynomial Basis:}
-
-A polynomial basis is used so that the model can learn a curved relationship instead of being limited to a straight line. For a polynomial of degree \(d\), the standardized input is represented using powers from \(0\) to \(d\). As the polynomial degree increases, the model becomes more flexible and can capture more complex patterns in the data. However, if the degree is too high, the model can become unnecessarily complicated and may start fitting the noise instead of the actual underlying pattern.
-
-\textbf{Least Squares:}
-
-Least squares is used to find the best values of the polynomial weights. It minimizes the difference between the actual \(y\) values and the predicted values from the polynomial model. In other words, it finds the weights that give the smallest overall squared error on the training data. These weights are calculated using the normal equation.
-
-Therefore, in this experiment, feature scaling helps keep the calculations numerically stable, the polynomial basis allows the model to capture non-linear patterns, and least squares finds the polynomial coefficients that best fit the training data. The performance of the model is then evaluated using Mean Squared Error (MSE).
-
-
-
-\textbf{Feature standardization.}
-Only the training split is used to calculate the mean and standard deviation:
-\begin{align}
-  \mu_x &= \frac{1}{N_{\mathrm{tr}}}
-            \sum_{i=1}^{N_{\mathrm{tr}}}x_i,
-  &
-  \sigma_x &= \sqrt{\frac{1}{N_{\mathrm{tr}}}
-            \sum_{i=1}^{N_{\mathrm{tr}}}(x_i-\mu_x)^2}, \\
-  z_i &= \frac{x_i-\mu_x}{\sigma_x},
-  &
-  N_{\mathrm{tr}} &= 6{,}000.
-\end{align}
-The same $\mu_x$ and $\sigma_x$ are used to standardize the validation and
-test inputs.
-
-\textbf{Polynomial basis.}
-For degree $d$, each standardized input is mapped to
 \begin{equation}
-  \boldsymbol{\phi}_d(z_i)
-  = \begin{bmatrix}1 & z_i & z_i^2 & \cdots & z_i^d\end{bmatrix}^{T}.
-\end{equation}
-The design matrix is
-\begin{equation}
-  X_d =
-  \begin{bmatrix}
-    1 & z_1 & z_1^2 & \cdots & z_1^d \\
-    1 & z_2 & z_2^2 & \cdots & z_2^d \\
-    \vdots & \vdots & \vdots & \ddots & \vdots \\
-    1 & z_N & z_N^2 & \cdots & z_N^d
-  \end{bmatrix}.
+  \boldsymbol{\phi}(z)=\begin{bmatrix}1&z&z^2&\cdots&z^d\end{bmatrix}^{\mathsf T},
+  \qquad z=\frac{x-\mu_x}{\sigma_x}.
+  \label{eq:poly-basis}
 \end{equation}
 
-\textbf{Model and prediction.}
+The target variable is also scaled to match the input scale $t=(y-\mu_y)/\sigma_y$.
+
 \begin{equation}
-  \hat{y}_i
-  = \boldsymbol{\phi}_d(z_i)^T\mathbf{w}
-  = \sum_{j=0}^{d}w_jz_i^j.
+  \Phi_{nj}=\phi_j(z_n),
+  \qquad \hat{t}(z,\mathbf{w})=\mathbf{w}^{\mathsf T}\boldsymbol{\phi}(z).
+  \label{eq:design}
 \end{equation}
 
-\textbf{Least-squares solution.}
-The weights minimize the mean squared training residual:
-\begin{equation}
-  J(\mathbf{w})
-  = \frac{1}{N_{\mathrm{tr}}}
-    \lVert\mathbf{y}-X_d\mathbf{w}\rVert_2^2.
-\end{equation}
-Setting the gradient to zero gives the normal equation and its solution:
-\begin{align}
-  X_d^T X_d\hat{\mathbf{w}} &= X_d^T\mathbf{y}, \\
-  \hat{\mathbf{w}} &= (X_d^T X_d)^{-1}X_d^T\mathbf{y}.
-\end{align}
+The weights are obtained by solving for least squares:
 
-\textbf{Mean squared error.}
-For any split $\mathcal{S}$,
 \begin{equation}
-  \operatorname{MSE}_{\mathcal{S}}(d)
-  = \frac{1}{|\mathcal{S}|}
-    \sum_{i\in\mathcal{S}}(y_i-\hat{y}_i)^2.
+  \mathbf{w}_{\mathrm{ML}}
+  =(\boldsymbol{\Phi}^{\mathsf T}\boldsymbol{\Phi})^{-1}
+    \boldsymbol{\Phi}^{\mathsf T}\mathbf{t}.
+  \label{eq:least-squares}
 \end{equation}
 
-\subsection*{Effect of Polynomial Degree}
+We start with a single input vector {x} and output {y}. We then standardize the data, We transform our inputs using a polynomial basis and then we solve for the least squares solution. We will talk about normalization in more detail in the additional experiments section.
+\subsection*{Degree selection}
 
-A low-degree polynomial may underfit the data because it does not have enough flexibility to represent the non-linear relationship between \(x\) and \(y\). For example, a degree-\(1\) polynomial can only produce a straight line, so it cannot adequately capture a complex curved pattern.
+We experimented different degrees of polynomial (i.e.) from 1 to 15 in order to choose the best degree of polynomial, which is decided via calculating MSE (Mean Squared Error) for each one of those degrees.
 
-As the polynomial degree increases, the fitted curve becomes more flexible. A degree-\(3\) or degree-\(5\) polynomial can capture more of the curvature in the data, while higher-degree polynomials can model more detailed variations.
+\begin{equation}
+  \mathrm{MSE}=\frac{1}{N}\sum_{n=1}^{N}(y_n-\hat{y}_n)^2.
+\end{equation}
 
-In the experiment, the fitted curves become increasingly flexible as the degree increases from \(1\) to \(15\). The training error generally decreases as the degree increases because the model has more parameters and therefore a greater ability to fit the training data. However, increasing the degree indefinitely is not necessarily beneficial because a very complex polynomial can start fitting the noise rather than the underlying relationship. Therefore, the polynomial degree must be selected based on validation performance rather than training error alone.
-
-
-\begin{figure}[p]
+\begin{figure}[H]
   \centering
-  \includegraphics[height=0.84\textheight]{polynomial_fits_degrees_1_to_15.png}
-  \caption{Polynomial curves fitted for degrees 1 through 15.}
-  \label{fig:degree-fits}
+  \includegraphics[height=0.9\textheight,keepaspectratio]{polynomial_fits_degrees_1_to_15.png}
+  \caption{Polynomial fits for degrees 1 to 15.}
+  \label{fig:poly-fits}
 \end{figure}
-
-\clearpage
-
-The degree is selected using the validation error:
-\begin{equation}
-  d^* = \underset{d\in\{1,2,\ldots,15\}}{\arg\min}\;
-        \operatorname{MSE}_{\mathrm{val}}(d) = 10.
-\end{equation}
-
-\begin{table}[H]
-  \centering
-  \begin{tabular}{rrr}
-    \toprule
-    Degree $d$ & Training MSE & Validation MSE \\
-    \midrule
-    1  & 1144.10 & 1055.51 \\
-    3  &  961.71 &  901.58 \\
-    5  &  906.23 &  849.98 \\
-    6  &  567.61 &  534.78 \\
-    7  &  478.17 &  467.47 \\
-    8  &  364.92 &  348.96 \\
-    10 &  364.69 &  348.63 \\
-    15 &  364.53 &  349.14 \\
-    \bottomrule
-  \end{tabular}
-  \caption{Selected training and validation errors from the degree experiment.}
-  \label{tab:degree-errors}
-\end{table}
-
-The training and validation MSE values generally decrease as the polynomial degree increases. This indicates that increasing the model complexity initially helps the model fit the data better.
-
-For degree \(1\), the training MSE is \(1144.10\) and the validation MSE is \(1055.51\). At degree \(3\), these values decrease to \(961.71\) and \(901.58\), respectively. For degree \(5\), they further decrease to \(906.23\) and \(849.98\), respectively.
-
-A major improvement can be observed around degrees \(6\)--\(8\). The validation MSE decreases from \(849.98\) at degree \(5\) to \(534.78\) at degree \(6\), \(467.47\) at degree \(7\), and \(348.96\) at degree \(8\). This shows that higher-degree polynomials are able to capture the non-linear patterns in the data better than the lower-degree models.
-
-After degree \(8\), the improvement becomes very small. The validation MSE is \(348.63\) at degree \(10\), which is only slightly lower than \(348.96\) at degree \(8\). At degree \(15\), the validation MSE increases slightly to \(349.14\). Therefore, degree \(10\) was selected because it gives the lowest validation MSE among the tested degrees.
-
-The training and validation MSE values are also fairly close to each other. This suggests that the selected model is not simply fitting the training data but is able to generalize reasonably well to unseen data.
-
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.82\textwidth]{degree_mse_comparison.png}
-  \caption{Training and validation mean squared error across polynomial degrees.}
+  \caption{Training and validation MSE for each polynomial degree.}
   \label{fig:degree-mse}
 \end{figure}
 
-\subsection*{Final Model Evaluation}
+\begin{table}[H]
+  \centering
+  \caption{Selected values from the degree comparison.}
+  \begin{tabular}{rrr}
+    \toprule
+    Degree & Training MSE & Validation MSE \\
+    \midrule
+    1  & 1144.10 & 1055.51 \\
+    5  & 906.23  & 849.98  \\
+    8  & 364.92  & 348.96  \\
+    10 & 364.69  & \textbf{348.63} \\
+    15 & 364.53  & 349.14  \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
-After selecting $d^*=10$, the training and validation samples are combined:
-\begin{equation}
-  \mathcal{D}_{\mathrm{fit}}
-  = \mathcal{D}_{\mathrm{train}}\cup\mathcal{D}_{\mathrm{val}},
-  \qquad |\mathcal{D}_{\mathrm{fit}}|=8{,}000.
-\end{equation}
-The standardization parameters and degree-10 weights are recalculated using
-only $\mathcal{D}_{\mathrm{fit}}$. The resulting held-out test error is
-\begin{equation}
-  \operatorname{MSE}_{\mathrm{test}}(10)=340.0071.
-\end{equation}
+We train the model on the train set and then we try out different degrees of polynomial basis on the validation set. Out of what we have tested above, Polynomial of degree 10 gave the lowest validation MSE. Thus, we choose degree 10 as the best polynomial degree.
 
-After comparing the different polynomial degrees, degree \(10\) was selected because it gave the lowest validation MSE of \(348.63\).
+\subsection*{Final evaluation}
 
-For the final model, the training and validation datasets were combined to create a larger fitting dataset containing \(8{,}000\) samples. This gives the final model more data to learn from after the polynomial degree has already been selected.
-
-The mean and standard deviation used for standardization were recalculated using only these \(8{,}000\) samples. After that, the weights of the degree-\(10\) polynomial were recalculated using the combined training and validation data.
-
-The test set was kept completely separate and was used only for the final evaluation. The resulting test MSE was \(340.0071\).
-
-The test MSE is slightly lower than the validation MSE of \(348.63\). This shows that the selected degree-\(10\) model performs well on the unseen test data for this particular split. Since the test data were not used during training or model selection, the test MSE provides a fair estimate of how well the final model can generalize to new data.
+The polynomial of degree 10 is modeled on the combined set of training and validation examples (8000 samples). That yields us Test MSE of $340.0071$.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.82\textwidth]{test_fit_degree_10.png}
-  \caption{Degree-10 polynomial fitted to the held-out test data; test MSE $=340.0071$.}
-  \label{fig:final-test}
+  \caption{Final degree-10 polynomial fit on the test set.}
+  \label{fig:poly-test}
 \end{figure}
 
-% ---------- Additional Experiments ----------
-\section*{Additional Experiments:}
+\section*{ADDITIONAL EXPERIMENTS}
 
-% ---------- Inference ----------
-\section*{\centering \underline{Inference}}
+\subsection*{Polynomial basis without normalization}
 
-The experiment shows that polynomial degree has a significant effect on model complexity and performance. Very low-degree polynomials underfit the data because they are too simple to capture its non-linear relationship. As the degree increases, the model becomes more flexible, and both training and validation errors initially decrease.
+The degree and the 80--20 final split were kept fixed. The unnormalized degree-10 model produced a test MSE of $340.0071$.
 
-A major improvement was observed between degrees \(5\) and \(8\), indicating that the additional polynomial terms helped the model capture important non-linear patterns in the data. After this point, the improvement became very small. Degree \(10\) produced the lowest validation MSE of \(348.63\) and was therefore selected as the final model. Although the training MSE continued to decrease slightly for higher degrees, the validation MSE increased slightly at degree \(15\), showing that increasing model complexity does not always improve generalization.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{unnormalized_polynomial_test_fit.png}
+  \caption{Degree-10 polynomial fit without normalizing the input or target.}
+  \label{fig:unnormalized-test}
+\end{figure}
 
-The final degree-\(10\) model was retrained using the combined \(8{,}000\) training and validation samples and achieved a test MSE of \(340.0071\) on the held-out test set. The close validation and test performance suggests that the selected model generalizes well to unseen data for this dataset.
+\begin{table}[H]
+  \centering
+  \caption{Examples of weights from the unnormalized polynomial model.}
+  \begin{tabular}{lr}
+    \toprule
+    Weight & Value \\
+    \midrule
+    $w_0$  & $3.947\times10^{1}$ \\
+    $w_5$  & $1.623\times10^{-7}$ \\
+    $w_{10}$ & $2.457\times10^{-18}$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
-Overall, the experiment demonstrated the importance of choosing an appropriate model complexity instead of simply selecting the model with the lowest training error. I also learned how data shuffling, feature standardization, polynomial basis construction, least-squares fitting, validation-based model selection, and final test evaluation work together to build and evaluate a regression model.
+Both normalized and unnormalized version of polynomial regression yields us the same results. But, there is one particular thing that needs attention (i.e.) the weights. In the unnormalized version the weights had to get smaller in order to compensate for the large magnitude of input features as you can see $w_{10}$ is very small. But, the whole point of doing normalization is to improve the numerical stability while computation of least sqaures solutions. Because things like ${\boldsymbol{\Phi}^{\mathsf T}\boldsymbol{\Phi}}$ can easily have large values and that might cause problems like cutting of some floating point precision and etc... Usually it's a good thing to scale the values before you move on to modeling.
+
+\subsection*{Gaussian basis}
+
+For center $c_j$ and fixed width $\sigma$, the Gaussian basis function is
+
+\begin{equation}
+  \phi_j(x)=\exp\left\{-\frac{(x-c_j)^2}{2\sigma^2}\right\}.
+  \label{eq:gaussian-basis}
+\end{equation}
+
+The design matrix is constructed with gaussian basis functions and equally spaced centers are chosen and we experiment with multiple center counts such as $5,10,15,20,25,30,$ and $35$.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{gaussian_center_mse_comparison.png}
+  \caption{Training and validation MSE for the candidate Gaussian centre counts.}
+  \label{fig:gaussian-selection}
+\end{figure}
+
+The validation MSE becomes lowest when $348.9237$ at 30 centers. After combining the train and validation set we re-train the Gaussian model and obtain a test MSE of $342.1092$.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{gaussian_test_fit.png}
+  \caption{Final 30-center Gaussian-basis fit on the test set.}
+  \label{fig:gaussian-test}
+\end{figure}
+
+In gaussian basis it's all about centers and distances. If a point is away from the center it returns a low value and if a point in near the center it returns a high value. While the MSE came out to be pretty close to the polynomial basis, Visually the gaussian basis is very close to what polynomial basis have achieved. But from what we have tested, we could conclude among the 2 basis, Polynomial basis is performing better in this data.
+
+\section*{INFERENCE}
+
+\begin{table}[H]
+  \centering
+  \caption{Final comparison of the three fitted models.}
+  \begin{tabular}{lrr}
+    \toprule
+    Model & Selected size & Test MSE \\
+    \midrule
+    Normalized polynomial & Degree 10 & 340.0071 \\
+    Unnormalized polynomial & Degree 10 & 340.0071 \\
+    Gaussian basis & 30 centers & 342.1092 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The polynomial with the degree 10 learned the relationship better between the inputs and the outputs. Normalization doesn't particularly improve the the model. But, it changed the scale of the weights, which is expected as weights are just compensations that gets multiplied with inputs to reach the output. Gaussian basis with 30 centered performed considerably well. Polynomial basis performed slightly better while tested.
+
+Overall this is experiment is a combination of learning new things and clearing out misconceptions. We learned how weights compensate for the inputs magnitude. Also, our misconceptions in the area of basis functions has been cleared. Like before we thought input feature matrix itself has multiple columns and they each get transformed via the basis function and get placed in their respective places. After this experiment, we came to know that a single feature vector in transformed into multiple features via basis function and that is a valuable learning experience.
+
+\begin{thebibliography}{1}
+\bibitem{bishop2006}
+C. M. Bishop, \textit{Pattern Recognition and Machine Learning}, Springer, 2006, Chapter 3.
+\end{thebibliography}
 
 \end{document}
