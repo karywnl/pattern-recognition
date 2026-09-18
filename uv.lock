@@ -231,6 +231,9 @@ requires-dist = [
     { name = "pillow", specifier = ">=12.3.0" },
 ]
 
+[package.metadata.requires-dev]
+dev = []
+
 [[package]]
 name = "pillow"
 version = "12.3.0"
