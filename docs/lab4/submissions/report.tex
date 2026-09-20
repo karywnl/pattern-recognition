@@ -1,0 +1,385 @@
+\documentclass[12pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{xcolor}
+
+\graphicspath{{figures/}}
+
+\newcommand{\studentname}{KARTHIKEYAN M}
+\newcommand{\registernumber}{26120004}
+\newcommand{\teammatename}{MIRTHULA R}
+\newcommand{\teammateregister}{261200121}
+\newcommand{\submissionmonth}{SEPTEMBER 2026}
+
+% Replace every red prompt with your own explanation before submission.
+\newcommand{\todo}[1]{%
+  \par\noindent
+  \textcolor{red}{\textbf{[WRITE HERE:} \textit{#1}\textbf{]}}
+  \par
+}
+
+\begin{document}
+
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+{\Large \textbf{ASSIGNMENT REPORT-4}}\\[2cm]
+
+\textbf{Submitted by :}\\[0.3cm]
+\textbf{\studentname} \ [\registernumber]\\[0.3cm]
+\textbf{\teammatename} \ [\teammateregister]\\[2cm]
+
+\textbf{Under the guidance of :}\\[0.3cm]
+\textbf{HEMA ARUNACHALAM MURTHY}\\[1.5cm]
+
+\textbf{For The Subject}\\[0.5cm]
+{\Large \textbf{Pattern Recognition and Machine Learning}}\\[0.3cm]
+\textbf{(26AI5707)}\\[3cm]
+
+\vfill
+\textbf{DEPARTMENT OF COMPUTER SCIENCE \& ENGINEERING}\\[0.3cm]
+\textbf{SHIV NADAR UNIVERSITY}\\[0.3cm]
+\textbf{KALAVAKAM}\\[1.5cm]
+\textbf{\submissionmonth}
+\end{titlepage}
+
+\section*{INTRODUCTION}
+
+\todo{In 4--5 lines, explain that the assignment studies how isotropic,
+diagonal, and full covariance matrices change the shape and orientation of a
+two-dimensional Gaussian. Also mention that the final experiment compares
+decision boundaries between two Gaussian classes.}
+
+\section*{MATHEMATICAL BACKGROUND}
+
+For a $d$-dimensional Gaussian random vector, the probability density is
+
+\begin{equation}
+  p(\mathbf{x}) =
+  \frac{1}{(2\pi)^{d/2}|\boldsymbol{\Sigma}|^{1/2}}
+  \exp\left(
+    -\frac{1}{2}
+    (\mathbf{x}-\boldsymbol{\mu})^{\mathsf T}
+    \boldsymbol{\Sigma}^{-1}
+    (\mathbf{x}-\boldsymbol{\mu})
+  \right).
+  \label{eq:multivariate-gaussian}
+\end{equation}
+
+The quadratic term
+
+\begin{equation}
+  d_M^2(\mathbf{x},\boldsymbol{\mu}) =
+  (\mathbf{x}-\boldsymbol{\mu})^{\mathsf T}
+  \boldsymbol{\Sigma}^{-1}
+  (\mathbf{x}-\boldsymbol{\mu})
+  \label{eq:mahalanobis}
+\end{equation}
+
+is the squared Mahalanobis distance. The constant density curves are obtained
+by fixing this value:
+
+\begin{equation}
+  (\mathbf{x}-\boldsymbol{\mu})^{\mathsf T}
+  \boldsymbol{\Sigma}^{-1}
+  (\mathbf{x}-\boldsymbol{\mu}) = c.
+  \label{eq:constant-density}
+\end{equation}
+
+If $\lambda_i$ and $\mathbf{q}_i$ are the eigenvalues and eigenvectors of
+$\boldsymbol{\Sigma}$, then $\mathbf{q}_i$ gives a principal direction and
+$\sqrt{\lambda_i}$ gives the standard deviation along that direction. At
+contour level $c$, the full axis length in that direction is
+$2\sqrt{c\lambda_i}$.
+
+\todo{Briefly explain why Mahalanobis distance is more suitable than raw
+Euclidean distance when the two features have different spreads or are
+correlated.}
+
+\section*{EXPERIMENTAL SETUP}
+
+The experiments used $N=1000$ samples and a fixed random seed of 42. Two
+one-dimensional Gaussian datasets were generated and then stacked as columns
+to form the two dimensional samples. The initial parameters were
+
+\begin{equation}
+  \boldsymbol{\mu}=
+  \begin{bmatrix}2\\4\end{bmatrix},
+  \qquad \sigma=1.
+\end{equation}
+
+\todo{Mention that the Gaussian samples were produced using the supplied
+Gaussian generator. Explain in one sentence why a fixed seed was used.}
+
+\section*{ISOTROPIC COVARIANCE MATRIX}
+
+For the isotropic case, the target covariance matrix was
+
+\begin{equation}
+  \mathbf{C}=\sigma^2\mathbf{I}
+  =\begin{bmatrix}1&0\\0&1\end{bmatrix}.
+\end{equation}
+
+The estimated mean and covariance were
+
+\begin{equation}
+  \hat{\boldsymbol{\mu}}=
+  \begin{bmatrix}1.9841\\3.9676\end{bmatrix},
+  \qquad
+  \hat{\mathbf{C}}=
+  \begin{bmatrix}
+    1.0380 & 0.0463\\
+    0.0463 & 1.0752
+  \end{bmatrix}.
+\end{equation}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.70\textwidth]{isotropic_samples.png}
+  \caption{Samples generated using isotropic covariance.}
+  \label{fig:isotropic-samples}
+\end{figure}
+
+\begin{table}[H]
+  \centering
+  \caption{Theoretical and estimated eigenvalues for isotropic covariance.}
+  \begin{tabular}{lccc}
+    \toprule
+    Direction & Theoretical $\lambda$ & Estimated $\lambda$ & Estimated axis length ($c=1$) \\
+    \midrule
+    Major & 1.0000 & 1.1065 & 2.104 \\
+    Minor & 1.0000 & 1.0067 & 2.007 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{isotropic_contours_axes.png}
+  \caption{Constant Mahalanobis-distance curves and estimated principal axes
+  for the isotropic data.}
+  \label{fig:isotropic-contours}
+\end{figure}
+
+\todo{Compare the target and estimated covariance/eigenvalues. Explain why
+the off-diagonal covariance is small but not exactly zero, and why the sampled
+contour is close to a circle rather than a perfect circle.}
+
+\section*{DIAGONAL COVARIANCE MATRIX}
+
+The target diagonal covariance was
+
+\begin{equation}
+  \mathbf{C}_{\mathrm{diag}}=
+  \begin{bmatrix}4&0\\0&1\end{bmatrix}.
+\end{equation}
+
+Starting from the isotropic data, the transformation used was
+
+\begin{equation}
+  \mathbf{Y}=\boldsymbol{\mu}+
+  \mathbf{C}_{\mathrm{diag}}^{1/2}
+  (\mathbf{X}-\boldsymbol{\mu}),
+  \qquad
+  \mathbf{C}_{\mathrm{diag}}^{1/2}=
+  \begin{bmatrix}2&0\\0&1\end{bmatrix}.
+  \label{eq:diagonal-transform}
+\end{equation}
+
+The estimated covariance was
+
+\begin{equation}
+  \hat{\mathbf{C}}_{\mathrm{diag}}=
+  \begin{bmatrix}
+    4.1520 & 0.0927\\
+    0.0927 & 1.0752
+  \end{bmatrix}.
+\end{equation}
+
+\begin{table}[H]
+  \centering
+  \caption{Theoretical and estimated eigenvalues for diagonal covariance.}
+  \begin{tabular}{lccc}
+    \toprule
+    Direction & Theoretical $\lambda$ & Estimated $\lambda$ & Estimated axis length ($c=1$) \\
+    \midrule
+    Major & 4.0000 & 4.1548 & 4.077 \\
+    Minor & 1.0000 & 1.0724 & 2.071 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{diagonal_contours_axes.png}
+  \caption{Constant density curves and principal axes for diagonal covariance.}
+  \label{fig:diagonal-contours}
+\end{figure}
+
+\todo{Explain why the first coordinate becomes approximately twice as wide
+in standard-deviation units, why the contours are elliptical, and why their
+principal axes remain close to the coordinate axes.}
+
+\section*{FULL COVARIANCE MATRIX}
+
+The full covariance matrix was chosen as
+
+\begin{equation}
+  \mathbf{C}_{\mathrm{full}}=
+  \begin{bmatrix}
+    4.0 & 1.5\\
+    1.5 & 1.0
+  \end{bmatrix}.
+\end{equation}
+
+For a full covariance matrix, the element-wise square root is not the required
+matrix square root. Using the eigendecomposition
+$\mathbf{C}=\mathbf{Q}\boldsymbol{\Lambda}\mathbf{Q}^{\mathsf T}$, it was
+constructed as
+
+\begin{equation}
+  \mathbf{C}^{1/2}=
+  \mathbf{Q}\boldsymbol{\Lambda}^{1/2}\mathbf{Q}^{\mathsf T},
+  \qquad
+  \mathbf{C}^{1/2}(\mathbf{C}^{1/2})^{\mathsf T}=\mathbf{C}.
+  \label{eq:matrix-square-root}
+\end{equation}
+
+The transformed samples had estimated covariance
+
+\begin{equation}
+  \hat{\mathbf{C}}_{\mathrm{full}}=
+  \begin{bmatrix}
+    4.2597 & 1.6625\\
+    1.6625 & 1.1065
+  \end{bmatrix}.
+\end{equation}
+
+\begin{table}[H]
+  \centering
+  \caption{Theoretical and estimated eigenvalues for full covariance.}
+  \begin{tabular}{lccc}
+    \toprule
+    Direction & Theoretical $\lambda$ & Estimated $\lambda$ & Estimated axis length ($c=1$) \\
+    \midrule
+    Major & 4.6213 & 4.9744 & 4.461 \\
+    Minor & 0.3787 & 0.3919 & 1.252 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{full_contours_axes.png}
+  \caption{Tilted constant density curves and principal axes for full
+  covariance.}
+  \label{fig:full-contours}
+\end{figure}
+
+\todo{Explain how the nonzero off-diagonal covariance makes the variables
+move together and rotates the ellipse. Connect the longer direction to the
+larger eigenvalue and the shorter direction to the smaller eigenvalue.}
+
+\section*{TWO GAUSSIAN CLASSES}
+
+For equal class priors, the class-dependent part of the Gaussian discriminant
+function is
+
+\begin{equation}
+  g_i(\mathbf{x})=
+  -\frac{1}{2}\log|\boldsymbol{\Sigma}_i|
+  -\frac{1}{2}
+  (\mathbf{x}-\boldsymbol{\mu}_i)^{\mathsf T}
+  \boldsymbol{\Sigma}_i^{-1}
+  (\mathbf{x}-\boldsymbol{\mu}_i).
+  \label{eq:discriminant}
+\end{equation}
+
+The decision boundary contains all points satisfying
+
+\begin{equation}
+  g_1(\mathbf{x})-g_2(\mathbf{x})=0.
+  \label{eq:decision-boundary}
+\end{equation}
+
+\subsection*{Equal covariance matrices}
+
+The first experiment used
+
+\begin{equation}
+  \boldsymbol{\mu}_1=\begin{bmatrix}0\\0\end{bmatrix},
+  \quad
+  \boldsymbol{\mu}_2=\begin{bmatrix}4\\4\end{bmatrix},
+  \quad
+  \boldsymbol{\Sigma}_1=\boldsymbol{\Sigma}_2=\mathbf{I}.
+\end{equation}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{equal_covariance_samples.png}
+    \caption{Generated class samples.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{equal_covariance_boundary.png}
+    \caption{Resulting decision boundary.}
+  \end{subfigure}
+  \caption{Two Gaussian classes with equal covariance matrices.}
+  \label{fig:equal-covariance-classes}
+\end{figure}
+
+\todo{Explain why the determinant and quadratic terms common to both classes
+cancel, leaving a straight-line boundary. For these means, also state why the
+line passes through the midpoint $(2,2)$.}
+
+\subsection*{Different covariance matrices}
+
+The second experiment retained the same means but used
+
+\begin{equation}
+  \boldsymbol{\Sigma}_1=
+  \begin{bmatrix}1&0\\0&1\end{bmatrix},
+  \qquad
+  \boldsymbol{\Sigma}_2=
+  \begin{bmatrix}4&1.5\\1.5&2\end{bmatrix}.
+\end{equation}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{unequal_covariance_samples.png}
+    \caption{Generated class samples.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{unequal_covariance_boundary.png}
+    \caption{Resulting decision boundary.}
+  \end{subfigure}
+  \caption{Two Gaussian classes with different covariance matrices.}
+  \label{fig:unequal-covariance-classes}
+\end{figure}
+
+\todo{Explain why the quadratic terms no longer cancel and therefore produce
+a curved boundary. Relate the curve to the greater spread and tilt of the
+second class. If two branches appear for another plot range or parameter
+choice, mention that both are genuine parts of the quadratic boundary.}
+
+\section*{INFERENCE}
+
+\todo{Summarize the progression: isotropic covariance gives an approximately
+circular cloud, diagonal covariance changes the axis-wise spreads, full
+covariance introduces rotation through correlation, equal class covariances
+give a linear boundary, and unequal covariances give a quadratic boundary.}
+
+\end{document}
