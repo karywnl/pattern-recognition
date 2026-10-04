@@ -36,7 +36,7 @@
 
 \section*{INTRODUCTION}
 
-This assignment is all about maximum likelihood parameter estimation (i.e.) we take three 2D Gaussian classes and estimate their parameters, $\hat{\boldsymbol\mu}_k$ and $\hat{\boldsymbol\Sigma}_k$. Not only do we estimate the parameters, we also split the data into train and test sets. We use the test set to check the classifier built from the estimated parameters and observe the confusion matrix, accuracy, and decision boundary. We do this for isotropic, diagonal, and full covariance matrices, with both shared and different covariances across classes.
+This assignment is all about maximum likelihood parameter estimation (i.e.) we take three 2D Gaussian classes and estimate their parameters, $\hat{\boldsymbol\mu}_k$ and $\hat{\boldsymbol\Sigma}_k$. Not only do we estimate the parameters, we also split the data into train and test sets and test the estimated parameters, which is estimated from the train set and observe the accuracy, confusion matrix and decision boundary and we repeat this process for different cases of covariance like isotropic, diagonal and full covariance and we also explore shared and different covariances among different classes.
 
 \section*{EXPERIMENTAL SETUP}
 \begin{center}
@@ -66,11 +66,10 @@ g_k(\mathbf{x})=-\tfrac12(\mathbf{x}-\hat{\boldsymbol\mu}_k)^{\mathsf T}
 
 Here $\hat{\boldsymbol\mu}_k$ is the estimated mean and $\hat{\boldsymbol\Sigma}_k$ is the estimated covariance matrix. The function $g_k(\mathbf{x})$ gives us log-density score. Since, the priors are equal here it tells you given the parameters how likely it belongs to class-k.
 
-The confusion matrices use true classes as rows and predicted classes as columns.
-
 \textbf{Taking a closer look into the decision boundaries:}\par\medskip
 
-Let $A_k=\hat{\boldsymbol\Sigma}_k^{-1}$. Then the squared Mahalanobis distance expands as
+Let $A_k=\hat{\boldsymbol\Sigma}_k^{-1}$. Then the squared Mahalanobis distance is represented as
+
 \[
 (\mathbf{x}-\hat{\boldsymbol\mu}_k)^{\mathsf T}A_k
 (\mathbf{x}-\hat{\boldsymbol\mu}_k)
@@ -85,7 +84,7 @@ g_k(\mathbf{x})=-\tfrac12\mathbf{x}^{\mathsf T}A_k\mathbf{x}
 -\tfrac12\hat{\boldsymbol\mu}_k^{\mathsf T}A_k\hat{\boldsymbol\mu}_k
 -\tfrac12\log|\hat{\boldsymbol\Sigma}_k|.
 \]
-When we compare two classes $i$ and $j$, their scores differ by
+When we compare two classes $i$ and $j$, the discriminant function is represented like this
 \[
 g_i(\mathbf{x})-g_j(\mathbf{x})
 =-\tfrac12\mathbf{x}^{\mathsf T}(A_i-A_j)\mathbf{x}
@@ -93,7 +92,9 @@ g_i(\mathbf{x})-g_j(\mathbf{x})
 -\hat{\boldsymbol\mu}_j^{\mathsf T}A_j)\mathbf{x}
 +\text{terms independent of }\mathbf{x}.
 \]
-When the classes share the same covariance, $A_i=A_j$. The quadratic term $\mathbf{x}^{\mathsf T}(A_i-A_j)\mathbf{x}$ cancels and leaves a linear decision boundary. When the classes have different covariances, that term generally remains and creates a nonlinear decision boundary.
+
+When different classes share the same covariance, $A_i=A_j$. The quadratic term $\mathbf{x}^{\mathsf T}(A_i-A_j)\mathbf{x}$ gets canceled and leaves us with a linear decision boundary. When different classes have different covariances, that quadratic term remains and produces a nonlinear decision boundary.
+
 \clearpage
 \section*{ISOTROPIC COVARIANCE: SHARED ACROSS CLASSES}
 \begin{figure}[H]
