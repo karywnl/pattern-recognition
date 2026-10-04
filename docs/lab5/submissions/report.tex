@@ -1,39 +1,57 @@
 \documentclass[11pt,a4paper]{article}
-\usepackage[margin=18mm]{geometry}
+\usepackage[margin=22mm]{geometry}
 \usepackage{amsmath}
 \usepackage{booktabs}
 \usepackage{float}
 \usepackage{graphicx}
-\usepackage{subcaption}
 \usepackage{xcolor}
 \graphicspath{{figures/}}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{4pt}
-\renewcommand{\arraystretch}{1.12}
+\setlength{\parskip}{5pt}
+\renewcommand{\arraystretch}{1.22}
+
+% Replace the red prompts with your own observations before submission.
+\newcommand{\todo}[1]{\par\medskip\noindent\textcolor{red}{\textbf{[WRITE HERE:} \textit{#1}\textbf{]}}\par}
 
 \begin{document}
-\begin{center}
-{\Large\bfseries ASSIGNMENT 5: MAXIMUM LIKELIHOOD ESTIMATION}\\[3pt]
-{\small 26AI5707 - Pattern Recognition and Machine Learning}\\[7pt]
-{\small KARTHIKEYAN M (26120004) \quad MIRTHULA R (261200121)}\\[2pt]
-{\small Shiv Nadar University, Chennai \quad October 2026}
-\end{center}
-\vspace{2mm}\hrule\vspace{5mm}
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+{\Large\textbf{ASSIGNMENT REPORT-5}}\\[0.7cm]
+{\large\textbf{MAXIMUM LIKELIHOOD PARAMETER ESTIMATION}}\\[1.7cm]
+\textbf{Submitted by:}\\[0.4cm]
+\textbf{KARTHIKEYAN M} [26120004]\\[0.3cm]
+\textbf{MIRTHULA R} [261200121]\\[1.8cm]
+\textbf{Under the guidance of:}\\[0.4cm]
+\textbf{HEMA ARUNACHALAM MURTHY}\\[1.5cm]
+\textbf{For the subject}\\[0.4cm]
+{\Large\textbf{Pattern Recognition and Machine Learning}}\\[0.3cm]
+\textbf{(26AI5707)}
+\vspace{2cm}
 
-\section*{Part 1: Synthetic data}
+{\textbf{DEPARTMENT OF COMPUTER SCIENCE \& ENGINEERING}\\[0.3cm]
+\textbf{SHIV NADAR UNIVERSITY, CHENNAI}\\[0.3cm]
+\textbf{OCTOBER 2026}}
+\end{titlepage}
+
+\section*{INTRODUCTION}
+
+This assignment is all about maximum likelihood parameter estimation (i.e.) we take three 2D Gaussian classes and estimate their parameters, $\hat{\boldsymbol\mu}_k$ and $\hat{\boldsymbol\Sigma}_k$. Not only do we estimate the parameters, we also split the data into train and test sets. We use the test set to check the classifier built from the estimated parameters and observe the confusion matrix, accuracy, and decision boundary. We do this for isotropic, diagonal, and full covariance matrices, with both shared and different covariances across classes.
+
+\section*{EXPERIMENTAL SETUP}
 \begin{center}
 \begin{tabular}{ll}
 \toprule
 Classes & Three 2-D Gaussian classes \\
-Means & $(0,0)$, $(4,0)$, $(2,4)$ \\
+Means & $(-2,-1)$, $(4,0)$, $(1,5)$ \\
 Samples & 10,000 per class \\
 Train/test & 8,000 / 2,000 per class \\
 Covariances & Isotropic, diagonal, full; shared and class-specific \\
 \bottomrule
 \end{tabular}
 \end{center}
-\vspace{6mm}
-\subsection*{Estimator and decision rule}
+
+\section*{PARAMETER ESTIMATION AND CLASSIFICATION}
 \[
 \hat{\boldsymbol\mu}_k=\frac{1}{N_k}\sum_i\mathbf{x}_{ki},\qquad
 \hat{\boldsymbol\Sigma}_k=\frac{1}{N_k}\sum_i
@@ -45,277 +63,405 @@ g_k(\mathbf{x})=-\tfrac12(\mathbf{x}-\hat{\boldsymbol\mu}_k)^{\mathsf T}
 \hat{\boldsymbol\Sigma}_k^{-1}(\mathbf{x}-\hat{\boldsymbol\mu}_k)
 -\tfrac12\log|\hat{\boldsymbol\Sigma}_k|.
 \]
-Shared estimates pool class residuals. Diagonal and isotropic estimates retain their required structure.
-The three class priors are equal, so the prior term does not change the predicted class.
 
-\vspace{6mm}
-\subsection*{Test accuracy}
+Here $\hat{\boldsymbol\mu}_k$ is the estimated mean and $\hat{\boldsymbol\Sigma}_k$ is the estimated covariance matrix. The function $g_k(\mathbf{x})$ gives us log-density score. Since, the priors are equal here it tells you given the parameters how likely it belongs to class-k.
+
+The confusion matrices use true classes as rows and predicted classes as columns.
+
+\textbf{Taking a closer look into the decision boundaries:}\par\medskip
+
+Let $A_k=\hat{\boldsymbol\Sigma}_k^{-1}$. Then the squared Mahalanobis distance expands as
+\[
+(\mathbf{x}-\hat{\boldsymbol\mu}_k)^{\mathsf T}A_k
+(\mathbf{x}-\hat{\boldsymbol\mu}_k)
+=\mathbf{x}^{\mathsf T}A_k\mathbf{x}
+-2\hat{\boldsymbol\mu}_k^{\mathsf T}A_k\mathbf{x}
++\hat{\boldsymbol\mu}_k^{\mathsf T}A_k\hat{\boldsymbol\mu}_k.
+\]
+Substituting this into $g_k(\mathbf{x})$ gives
+\[
+g_k(\mathbf{x})=-\tfrac12\mathbf{x}^{\mathsf T}A_k\mathbf{x}
++\hat{\boldsymbol\mu}_k^{\mathsf T}A_k\mathbf{x}
+-\tfrac12\hat{\boldsymbol\mu}_k^{\mathsf T}A_k\hat{\boldsymbol\mu}_k
+-\tfrac12\log|\hat{\boldsymbol\Sigma}_k|.
+\]
+When we compare two classes $i$ and $j$, their scores differ by
+\[
+g_i(\mathbf{x})-g_j(\mathbf{x})
+=-\tfrac12\mathbf{x}^{\mathsf T}(A_i-A_j)\mathbf{x}
++(\hat{\boldsymbol\mu}_i^{\mathsf T}A_i
+-\hat{\boldsymbol\mu}_j^{\mathsf T}A_j)\mathbf{x}
++\text{terms independent of }\mathbf{x}.
+\]
+When the classes share the same covariance, $A_i=A_j$. The quadratic term $\mathbf{x}^{\mathsf T}(A_i-A_j)\mathbf{x}$ cancels and leaves a linear decision boundary. When the classes have different covariances, that term generally remains and creates a nonlinear decision boundary.
+\clearpage
+\section*{ISOTROPIC COVARIANCE: SHARED ACROSS CLASSES}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.69\textwidth]{shared_isotropic_boundary.png}
+\caption{Test data and decision boundary. Accuracy: 99.73\%.}
+\end{figure}
+\vspace{3mm}
+\noindent
+\begin{minipage}[t]{0.25\textwidth}
+\vspace{0pt}\centering
+\textbf{Estimated means}\par\medskip
+\small
+\begin{tabular}{ccc}
+\toprule
+Class & $\hat\mu_{x_1}$ & $\hat\mu_{x_2}$ \\
+\midrule
+1 & -2.01 & -0.98 \\
+2 & 4.01 & 0.00 \\
+3 & 1.00 & 5.00 \\
+\bottomrule
+\end{tabular}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.43\textwidth}
+\vspace{0pt}\centering
+\textbf{Covariance}\par\medskip
+\small
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{cll}
+\toprule
+Class & Generating & Estimated \\
+\midrule
+1 & 1 & 1.01 \\
+2 & 1 & 1.01 \\
+3 & 1 & 1.01 \\
+\bottomrule
+\end{tabular}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.27\textwidth}
+\vspace{0pt}\centering
+\textbf{Confusion matrix}\par\medskip
+\small
+\begin{tabular}{c|ccc}
+\toprule
+T/P & 1 & 2 & 3 \\
+\midrule
+1 & 1995 & 3 & 2 \\
+2 & 1 & 1995 & 4 \\
+3 & 2 & 4 & 1994 \\
+\bottomrule
+\end{tabular}
+\end{minipage}\par
+\vspace{8mm}
+
+All these 3 classes share the same covariance matrix and thus, when we define the decision boundary the common quadratic term cancels out as we discussed before and that would leave us with a linear decision boundary. Since all the classes are equally spread and also they have well separated means, the errors are minimal (i.e.) we only have $16$ misclassifications out of $6,000$ data points from the test set.
+
+\clearpage
+\section*{ISOTROPIC COVARIANCE: DIFFERENT ACROSS CLASSES}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.69\textwidth]{different_isotropic_boundary.png}
+\caption{Test data and decision boundary. Accuracy: 96.57\%.}
+\end{figure}
+\vspace{3mm}
+\noindent
+\begin{minipage}[t]{0.25\textwidth}
+\vspace{0pt}\centering
+\textbf{Estimated means}\par\medskip
+\small
+\begin{tabular}{ccc}
+\toprule
+Class & $\hat\mu_{x_1}$ & $\hat\mu_{x_2}$ \\
+\midrule
+1 & -1.98 & -0.99 \\
+2 & 4.02 & -0.01 \\
+3 & 1.05 & 5.01 \\
+\bottomrule
+\end{tabular}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.43\textwidth}
+\vspace{0pt}\centering
+\textbf{Covariance}\par\medskip
+\small
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{cll}
+\toprule
+Class & Generating & Estimated \\
+\midrule
+1 & 1 & 0.98 \\
+2 & 2 & 2.04 \\
+3 & 4 & 4.07 \\
+\bottomrule
+\end{tabular}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.27\textwidth}
+\vspace{0pt}\centering
+\textbf{Confusion matrix}\par\medskip
+\small
+\begin{tabular}{c|ccc}
+\toprule
+T/P & 1 & 2 & 3 \\
+\midrule
+1 & 1981 & 9 & 10 \\
+2 & 7 & 1928 & 65 \\
+3 & 18 & 97 & 1885 \\
+\bottomrule
+\end{tabular}
+\end{minipage}\par
+\vspace{8mm}
+
+Here in this case, the classes have difference covariances and but the features $x1$ and $x2$ still have equal spread among each of the respective classes. Another thing to note here is, since we have different covariances the quadratic term in the discrimination function stays and thus resulting in a non-linear decision boundary. As you could see the points overlap a bit than before and thus causing some more misclassifications along the way.
+
+\clearpage
+\section*{DIAGONAL COVARIANCE: SHARED ACROSS CLASSES}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.69\textwidth]{shared_diagonal_boundary.png}
+\caption{Test data and decision boundary. Accuracy: 93.65\%.}
+\end{figure}
+\vspace{3mm}
+\noindent
+\begin{minipage}[t]{0.25\textwidth}
+\vspace{0pt}\centering
+\textbf{Estimated means}\par\medskip
+\small
+\begin{tabular}{ccc}
+\toprule
+Class & $\hat\mu_{x_1}$ & $\hat\mu_{x_2}$ \\
+\midrule
+1 & -1.99 & -1.01 \\
+2 & 4.01 & 0.05 \\
+3 & 1.00 & 4.97 \\
+\bottomrule
+\end{tabular}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.43\textwidth}
+\vspace{0pt}\centering
+\textbf{Covariance}\par\medskip
+\small
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{cll}
+\toprule
+Class & Generating & Estimated \\
+\midrule
+1 & (2, 4) & (2.00, 3.97) \\
+2 & (2, 4) & (2.00, 3.97) \\
+3 & (2, 4) & (2.00, 3.97) \\
+\bottomrule
+\end{tabular}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.27\textwidth}
+\vspace{0pt}\centering
+\textbf{Confusion matrix}\par\medskip
+\small
+\begin{tabular}{c|ccc}
+\toprule
+T/P & 1 & 2 & 3 \\
+\midrule
+1 & 1908 & 35 & 57 \\
+2 & 19 & 1882 & 99 \\
+3 & 75 & 96 & 1829 \\
+\bottomrule
+\end{tabular}
+\end{minipage}\par
+\vspace{8mm}
+
+Here have work on diagonal covariance (i.e.) the different classes have same covariance matrices, means different classes get the same spread but different variances among $x1$ and $x2$ directions. Since they have shared covariance matrices the quadratic term gets canceled out and we get a linear decision boundary.
+
+\clearpage
+\section*{DIAGONAL COVARIANCE: DIFFERENT ACROSS CLASSES}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.69\textwidth]{different_diagonal_boundary.png}
+\caption{Test data and decision boundary. Accuracy: 96.40\%.}
+\end{figure}
+\vspace{3mm}
+\noindent
+\begin{minipage}[t]{0.25\textwidth}
+\vspace{0pt}\centering
+\textbf{Estimated means}\par\medskip
+\small
+\begin{tabular}{ccc}
+\toprule
+Class & $\hat\mu_{x_1}$ & $\hat\mu_{x_2}$ \\
+\midrule
+1 & -1.98 & -0.99 \\
+2 & 3.99 & -0.01 \\
+3 & 1.00 & 5.02 \\
+\bottomrule
+\end{tabular}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.43\textwidth}
+\vspace{0pt}\centering
+\textbf{Covariance}\par\medskip
+\small
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{cll}
+\toprule
+Class & Generating & Estimated \\
+\midrule
+1 & (1, 4) & (1.00, 4.09) \\
+2 & (4, 1) & (4.07, 1.01) \\
+3 & (2, 3) & (2.00, 3.03) \\
+\bottomrule
+\end{tabular}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.27\textwidth}
+\vspace{0pt}\centering
+\textbf{Confusion matrix}\par\medskip
+\small
+\begin{tabular}{c|ccc}
+\toprule
+T/P & 1 & 2 & 3 \\
+\midrule
+1 & 1943 & 29 & 28 \\
+2 & 44 & 1927 & 29 \\
+3 & 40 & 46 & 1914 \\
+\bottomrule
+\end{tabular}
+\end{minipage}\par
+\vspace{8mm}
+
+Similarly we have diagonal covariance but different across classes meaning that not only the variance among the features is different, the spread among different classes is also different (i.e.) and as we have already seen the different covariance matrices mean the quadratic term stays in the discrimination function and therefore a non-linear decision boundary.
+
+\clearpage
+\section*{FULL COVARIANCE: SHARED ACROSS CLASSES}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.69\textwidth]{shared_full_boundary.png}
+\caption{Test data and decision boundary. Accuracy: 97.40\%.}
+\end{figure}
+\vspace{3mm}
+\noindent
+\begin{minipage}[t]{0.25\textwidth}
+\vspace{0pt}\centering
+\textbf{Estimated means}\par\medskip
+\small
+\begin{tabular}{ccc}
+\toprule
+Class & $\hat\mu_{x_1}$ & $\hat\mu_{x_2}$ \\
+\midrule
+1 & -2.01 & -0.99 \\
+2 & 4.06 & -0.03 \\
+3 & 1.03 & 5.00 \\
+\bottomrule
+\end{tabular}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.43\textwidth}
+\vspace{0pt}\centering
+\textbf{Covariance}\par\medskip
+\small
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{cll}
+\toprule
+Class & Generating & Estimated \\
+\midrule
+1 & (2, -1, 2) & (2.00, -1.00, 2.01) \\
+2 & (2, -1, 2) & (2.00, -1.00, 2.01) \\
+3 & (2, -1, 2) & (2.00, -1.00, 2.01) \\
+\bottomrule
+\end{tabular}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.27\textwidth}
+\vspace{0pt}\centering
+\textbf{Confusion matrix}\par\medskip
+\small
+\begin{tabular}{c|ccc}
+\toprule
+T/P & 1 & 2 & 3 \\
+\midrule
+1 & 1992 & 7 & 1 \\
+2 & 10 & 1917 & 73 \\
+3 & 2 & 63 & 1935 \\
+\bottomrule
+\end{tabular}
+\end{minipage}\par
+\vspace{8mm}
+
+Here, we have a full covariance case means the features $x1$ and $x2$ have some correlation cause the cloud of data points to tilt, the tilt being positive or negative depends on the sign of the $Cov(x1, x2)$ and About the decision boundary, it will be linear because we have shared covariance case, hence, the quadratic terms cancels out.
+
+\clearpage
+\section*{FULL COVARIANCE: DIFFERENT ACROSS CLASSES}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.69\textwidth]{different_full_boundary.png}
+\caption{Test data and decision boundary. Accuracy: 95.03\%.}
+\end{figure}
+\vspace{3mm}
+\noindent
+\begin{minipage}[t]{0.25\textwidth}
+\vspace{0pt}\centering
+\textbf{Estimated means}\par\medskip
+\small
+\begin{tabular}{ccc}
+\toprule
+Class & $\hat\mu_{x_1}$ & $\hat\mu_{x_2}$ \\
+\midrule
+1 & -1.98 & -1.00 \\
+2 & 3.99 & 0.00 \\
+3 & 1.03 & 4.97 \\
+\bottomrule
+\end{tabular}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.43\textwidth}
+\vspace{0pt}\centering
+\textbf{Covariance}\par\medskip
+\small
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{cll}
+\toprule
+Class & Generating & Estimated \\
+\midrule
+1 & (2, 1, 2) & (2.01, 0.99, 1.96) \\
+2 & (3, -1, 2) & (3.00, -1.01, 2.02) \\
+3 & (2, -1, 3) & (1.98, -1.02, 2.98) \\
+\bottomrule
+\end{tabular}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.27\textwidth}
+\vspace{0pt}\centering
+\textbf{Confusion matrix}\par\medskip
+\small
+\begin{tabular}{c|ccc}
+\toprule
+T/P & 1 & 2 & 3 \\
+\midrule
+1 & 1947 & 37 & 16 \\
+2 & 47 & 1859 & 94 \\
+3 & 11 & 93 & 1896 \\
+\bottomrule
+\end{tabular}
+\end{minipage}\par
+\vspace{8mm}
+
+Similarly, here we have full covariance matrix and different covariances for different classes and thus we end up with a non-linear decision boundary as the quadratic term survives in the discrimination function.
+
+
+% Insert the real-data experiment here when the assigned file becomes available.
+% Keep the inference after both the synthetic and real-data results.
+\clearpage
+\section*{INFERENCE}
 \begin{center}
 \begin{tabular}{lcc}
 \toprule
 Covariance & Shared (\%) & Different (\%) \\
 \midrule
-Isotropic & 97.20 & 89.05 \\
-Diagonal & 82.73 & 87.37 \\
-Full & 94.45 & 87.53 \\
+Isotropic & 99.73 & 96.57 \\
+Diagonal & 93.65 & 96.40 \\
+Full & 97.40 & 95.03 \\
 \bottomrule
 \end{tabular}
 \end{center}
-\vspace{8mm}
-{\small\color{gray}Part 2: assigned real-data file not yet available.}
-\newpage
-\section*{Isotropic covariance}
-\textit{Covariance entries below show $\sigma^2$.}
-\begin{figure}[H]
-\centering
-\begin{subfigure}[t]{0.48\textwidth}
-\centering
-\includegraphics[width=\linewidth]{shared_isotropic_boundary.png}
-\caption{Shared covariance}
-\end{subfigure}
-\hfill
-\begin{subfigure}[t]{0.48\textwidth}
-\centering
-\includegraphics[width=\linewidth]{different_isotropic_boundary.png}
-\caption{Different covariance}
-\end{subfigure}
-\caption{Test points and decision boundaries for isotropic covariance.}
-\end{figure}
-\vspace{7mm}
-\begin{minipage}[t]{0.48\textwidth}
-\small
-\textbf{Shared: 97.20\% accuracy}\\[3pt]
-\textbf{Estimated means}\\[-2pt]
-\begin{tabular}{ccc}
-\toprule
-Class & $\hat\mu_1$ & $\hat\mu_2$ \\
-\midrule
-1 & -0.01 & 0.02 \\
-2 & 4.01 & -0.00 \\
-3 & 2.00 & 4.00 \\
-\bottomrule
-\end{tabular}\\[5pt]
-\textbf{Covariance: generating / estimated}\\[-2pt]
-\begin{tabular}{cll}
-\toprule
-Class & Generating & Estimated \\
-\midrule
-1 & 1.00 & 1.01 \\
-2 & 1.00 & 1.01 \\
-3 & 1.00 & 1.01 \\
-\bottomrule
-\end{tabular}\\[5pt]
-\textbf{Confusion matrix} (rows: true; columns: predicted)\\[-2pt]
-\begin{tabular}{c|ccc}
- & 1 & 2 & 3 \\
-\hline
-1 & 1934 & 45 & 21 \\
-2 & 35 & 1944 & 21 \\
-3 & 18 & 28 & 1954 \\
-\end{tabular}
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.48\textwidth}
-\small
-\textbf{Different: 89.05\% accuracy}\\[3pt]
-\textbf{Estimated means}\\[-2pt]
-\begin{tabular}{ccc}
-\toprule
-Class & $\hat\mu_1$ & $\hat\mu_2$ \\
-\midrule
-1 & 0.02 & 0.01 \\
-2 & 4.02 & -0.01 \\
-3 & 2.05 & 4.01 \\
-\bottomrule
-\end{tabular}\\[5pt]
-\textbf{Covariance: generating / estimated}\\[-2pt]
-\begin{tabular}{cll}
-\toprule
-Class & Generating & Estimated \\
-\midrule
-1 & 1.00 & 0.98 \\
-2 & 2.00 & 2.04 \\
-3 & 4.00 & 4.07 \\
-\bottomrule
-\end{tabular}\\[5pt]
-\textbf{Confusion matrix} (rows: true; columns: predicted)\\[-2pt]
-\begin{tabular}{c|ccc}
- & 1 & 2 & 3 \\
-\hline
-1 & 1872 & 75 & 53 \\
-2 & 106 & 1776 & 118 \\
-3 & 118 & 187 & 1695 \\
-\end{tabular}
-\end{minipage}
-% Add observations in the student's own words.
-\newpage
-\section*{Diagonal covariance}
-\textit{Covariance entries below show $(\Sigma_{11},\Sigma_{22})$.}
-\begin{figure}[H]
-\centering
-\begin{subfigure}[t]{0.48\textwidth}
-\centering
-\includegraphics[width=\linewidth]{shared_diagonal_boundary.png}
-\caption{Shared covariance}
-\end{subfigure}
-\hfill
-\begin{subfigure}[t]{0.48\textwidth}
-\centering
-\includegraphics[width=\linewidth]{different_diagonal_boundary.png}
-\caption{Different covariance}
-\end{subfigure}
-\caption{Test points and decision boundaries for diagonal covariance.}
-\end{figure}
-\vspace{7mm}
-\begin{minipage}[t]{0.48\textwidth}
-\small
-\textbf{Shared: 82.73\% accuracy}\\[3pt]
-\textbf{Estimated means}\\[-2pt]
-\begin{tabular}{ccc}
-\toprule
-Class & $\hat\mu_1$ & $\hat\mu_2$ \\
-\midrule
-1 & 0.01 & -0.01 \\
-2 & 4.01 & 0.05 \\
-3 & 2.00 & 3.97 \\
-\bottomrule
-\end{tabular}\\[5pt]
-\textbf{Covariance: generating / estimated}\\[-2pt]
-\begin{tabular}{cll}
-\toprule
-Class & Generating & Estimated \\
-\midrule
-1 & (2.00, 4.00) & (2.00, 3.97) \\
-2 & (2.00, 4.00) & (2.00, 3.97) \\
-3 & (2.00, 4.00) & (2.00, 3.97) \\
-\bottomrule
-\end{tabular}\\[5pt]
-\textbf{Confusion matrix} (rows: true; columns: predicted)\\[-2pt]
-\begin{tabular}{c|ccc}
- & 1 & 2 & 3 \\
-\hline
-1 & 1671 & 135 & 194 \\
-2 & 109 & 1712 & 179 \\
-3 & 218 & 201 & 1581 \\
-\end{tabular}
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.48\textwidth}
-\small
-\textbf{Different: 87.37\% accuracy}\\[3pt]
-\textbf{Estimated means}\\[-2pt]
-\begin{tabular}{ccc}
-\toprule
-Class & $\hat\mu_1$ & $\hat\mu_2$ \\
-\midrule
-1 & 0.02 & 0.01 \\
-2 & 3.99 & -0.01 \\
-3 & 2.00 & 4.02 \\
-\bottomrule
-\end{tabular}\\[5pt]
-\textbf{Covariance: generating / estimated}\\[-2pt]
-\begin{tabular}{cll}
-\toprule
-Class & Generating & Estimated \\
-\midrule
-1 & (1.00, 4.00) & (1.00, 4.09) \\
-2 & (4.00, 1.00) & (4.07, 1.01) \\
-3 & (2.00, 3.00) & (2.00, 3.03) \\
-\bottomrule
-\end{tabular}\\[5pt]
-\textbf{Confusion matrix} (rows: true; columns: predicted)\\[-2pt]
-\begin{tabular}{c|ccc}
- & 1 & 2 & 3 \\
-\hline
-1 & 1762 & 106 & 132 \\
-2 & 192 & 1746 & 62 \\
-3 & 161 & 105 & 1734 \\
-\end{tabular}
-\end{minipage}
-% Add observations in the student's own words.
-\newpage
-\section*{Full covariance}
-\textit{Covariance entries below show $(\Sigma_{11},\Sigma_{12},\Sigma_{22})$.}
-\begin{figure}[H]
-\centering
-\begin{subfigure}[t]{0.48\textwidth}
-\centering
-\includegraphics[width=\linewidth]{shared_full_boundary.png}
-\caption{Shared covariance}
-\end{subfigure}
-\hfill
-\begin{subfigure}[t]{0.48\textwidth}
-\centering
-\includegraphics[width=\linewidth]{different_full_boundary.png}
-\caption{Different covariance}
-\end{subfigure}
-\caption{Test points and decision boundaries for full covariance.}
-\end{figure}
-\vspace{7mm}
-\begin{minipage}[t]{0.48\textwidth}
-\small
-\textbf{Shared: 94.45\% accuracy}\\[3pt]
-\textbf{Estimated means}\\[-2pt]
-\begin{tabular}{ccc}
-\toprule
-Class & $\hat\mu_1$ & $\hat\mu_2$ \\
-\midrule
-1 & -0.01 & 0.01 \\
-2 & 4.06 & -0.04 \\
-3 & 2.03 & 3.99 \\
-\bottomrule
-\end{tabular}\\[5pt]
-\textbf{Covariance: generating / estimated}\\[-2pt]
-\begin{tabular}{cll}
-\toprule
-Class & Generating & Estimated \\
-\midrule
-1 & (2.00, -1.50, 2.00) & (2.00, -1.50, 2.01) \\
-2 & (2.00, -1.50, 2.00) & (2.00, -1.50, 2.01) \\
-3 & (2.00, -1.50, 2.00) & (2.00, -1.50, 2.01) \\
-\bottomrule
-\end{tabular}\\[5pt]
-\textbf{Confusion matrix} (rows: true; columns: predicted)\\[-2pt]
-\begin{tabular}{c|ccc}
- & 1 & 2 & 3 \\
-\hline
-1 & 1962 & 38 & 0 \\
-2 & 40 & 1828 & 132 \\
-3 & 2 & 121 & 1877 \\
-\end{tabular}
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.48\textwidth}
-\small
-\textbf{Different: 87.53\% accuracy}\\[3pt]
-\textbf{Estimated means}\\[-2pt]
-\begin{tabular}{ccc}
-\toprule
-Class & $\hat\mu_1$ & $\hat\mu_2$ \\
-\midrule
-1 & 0.02 & 0.00 \\
-2 & 4.00 & -0.00 \\
-3 & 2.02 & 3.98 \\
-\bottomrule
-\end{tabular}\\[5pt]
-\textbf{Covariance: generating / estimated}\\[-2pt]
-\begin{tabular}{cll}
-\toprule
-Class & Generating & Estimated \\
-\midrule
-1 & (2.00, 1.30, 1.50) & (2.00, 1.29, 1.48) \\
-2 & (3.00, -1.50, 1.50) & (3.00, -1.51, 1.51) \\
-3 & (1.20, 0.70, 3.00) & (1.17, 0.66, 2.95) \\
-\bottomrule
-\end{tabular}\\[5pt]
-\textbf{Confusion matrix} (rows: true; columns: predicted)\\[-2pt]
-\begin{tabular}{c|ccc}
- & 1 & 2 & 3 \\
-\hline
-1 & 1756 & 108 & 136 \\
-2 & 175 & 1709 & 116 \\
-3 & 153 & 60 & 1787 \\
-\end{tabular}
-\end{minipage}
-% Add observations in the student's own words.
+
+The main learning curve about these experiments are when you have class overlap they points tends to misclassify here and there and overlap happens when you have different class mean near to each other or even when the mean is a bit away if respective class have different spread for $x1$ and $x2$ it still might overlap, atleast that's what happened in the diagonal-shared case causing the accuracy to drop to $93.65 \%$.
+
+We were also able to infer when does a decision boundary becomes linear and non-linear by relating it to the discriminant function.
+
+
 \end{document}
