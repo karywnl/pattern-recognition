@@ -37,3 +37,5 @@ class KMeans:
             labels.append(np.argmin(distances))
 
         return np.array(labels, dtype=int)
+
+    
