@@ -19,11 +19,14 @@ class GMM:
 
         for k in range(self.K):
             difference = X - self.means[k]
-            # Cholesky factor: covariance = cov_sqrt @ cov_sqrt.T
-            cov_sqrt = np.linalg.cholesky(self.covariances[k])
-            standard_difference = np.linalg.solve(cov_sqrt, difference.T).T
-            log_det = 2 * np.log(np.diag(cov_sqrt)).sum()
-            d_squared = np.sum(standard_difference ** 2, axis=1)
+            eigenvalues = np.linalg.eigvalsh(self.covariances[k])
+            if np.any(eigenvalues <= 0):
+                raise ValueError("Covariance must be positive definite. Try a larger reg.")
+            # Log determinant = sum of the logs of the eigenvalues.
+            log_det = np.log(eigenvalues).sum()
+            inverse_covariance = np.linalg.inv(self.covariances[k])
+            # Quadratic term: (x - mean).T @ inverse_covariance @ (x - mean)
+            d_squared = np.sum((difference @ inverse_covariance) * difference, axis=1)
             scores[:, k] = np.log(self.weights[k]) - 0.5 * (
                 d * np.log(2 * np.pi) + log_det + d_squared
             )
