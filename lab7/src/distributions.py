@@ -1,14 +1,30 @@
+import time
 import numpy as np
+
+
+# Linear congruential generator: keeps its state between calls.
+class LCG:
+    def __init__(self, seed=None):
+        if seed is None:
+            seed = time.time_ns()
+        self.state = int(seed) % (2 ** 64)
+
 
 # Uniform Distribution
 def uniform(a, b, n, rng=None):
     if rng is None:
-        rng = np.random.default_rng()
+        rng = LCG()
+
+    multiplier = 6364136223846793005
+    increment = 1442695040888963407
+    modulus = 2 ** 64
 
     samples = np.zeros(n)
     for i in range(n):
-        u = rng.random()          # raw sample, uniform in [0, 1)
-        samples[i] = a + (b - a) * u   # rescale u into [a, b)
+        rng.state = (multiplier * rng.state + increment) % modulus
+        # Convert the state to [0, 1), using 53 bits to avoid rounding to 1.
+        u = (rng.state // (2 ** 11)) / (2 ** 53)
+        samples[i] = a + (b - a) * u
 
     return samples
 
@@ -16,7 +32,7 @@ def uniform(a, b, n, rng=None):
 # Gaussian Distribution (polar / Marsaglia method)
 def gaussian(mu, sigma, n, rng=None):
     if rng is None:
-        rng = np.random.default_rng()
+        rng = LCG()
 
     samples = np.zeros(n)
     i = 0
