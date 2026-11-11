@@ -4,7 +4,6 @@ from .pca import PCA
 
 
 def plot_pca_2d(X, y):
-    """Plot training samples using a separate two-component PCA."""
     pca = PCA(k=2).fit(X)
     points = pca.transform(X)
 
